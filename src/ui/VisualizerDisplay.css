@@ -1,0 +1,5 @@
+.Visualizer-window {
+  height: -webkit-calc(100vh - 5vh);
+  height: -moz-calc(100vh - 5vh);
+  height: calc(100vh - 5vh);
+}
