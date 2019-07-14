@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 /**
  * This is a function.
  *
@@ -6,10 +8,12 @@
  * @param {number} a - length of servo arm
  * @param {number} l - distance between the center of servo arm rotation and the platform anchor point
  * @param {number} s - length of the connecting rod
- * @param {number} beta - angle of servo horn plane relative to base x-axis
+ * @param {number} beta - angle of servo horn plane relative to the forward axis of the base
  * @return {number} the calculated servo angle
  */
 let calcServoAngle = (q, B, a, l, s, beta) => {
+  q = new THREE.Vector3(q.x, q.z, q.y);
+  B = new THREE.Vector3(B.x, B.z, B.y);
   let L = Math.pow(l, 2) - (Math.pow(s, 2) - Math.pow(a, 2));
   let M = 2 * a * (q.z - B.z);
   let N = 2 * a * (Math.cos(beta) * (q.x - B.x) + Math.sin(beta) * (q.y - B.y));

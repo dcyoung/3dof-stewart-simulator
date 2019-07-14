@@ -18,6 +18,14 @@ function visualizerReducer(state, action) {
       state.visualizer.changeBackgroundColor(action.color);
       return state;
     }
+    case "activate_target_control": {
+      state.visualizer.activateTargetMode();
+      return state;
+    }
+    case "deactivate_target_control": {
+      state.visualizer.deactivateTargetMode();
+      return state;
+    }
     case "add_mechanism": {
       state.visualizer.addMechanism();
       return state;

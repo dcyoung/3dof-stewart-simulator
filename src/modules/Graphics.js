@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { OrthographicTrackballControls } from "three/examples/jsm/controls/OrthographicTrackballControls.js";
+import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 import { getEnumDefault } from "./Utils";
-import { Mechanism } from "./Mechanical";
+import { Mechanism } from "./Mechanism";
 
 // const pos_xAxis = new THREE.Vector3(1, 0, 0);
 // const neg_xAxis = new THREE.Vector3(-1, 0, 0);
@@ -162,7 +163,6 @@ class CameraManager {
     switch (theViewType) {
       case CameraViewEnum.PERSPECTIVE:
         this.camera = this.createPerspectiveCamera();
-        this.camera.up.set(0, 0, 1);
         this.setCameraView(theViewType);
         break;
       default:
@@ -180,7 +180,7 @@ class CameraManager {
     this.camera.rotation.set(0, 0, 0);
     switch (theViewType) {
       case CameraViewEnum.PERSPECTIVE:
-        this.camera.position.set(0, 0, this.startingCamDistance);
+        this.camera.position.set(0, this.startingCamDistance, 0);
         break;
       case CameraViewEnum.ORTHO_FRONT:
         this.camera.position.set(0, -this.startingCamDistance, 0);
@@ -293,12 +293,20 @@ class VisualizerSettings {
   }
 }
 
+class MoveableTarget extends THREE.Mesh {
+  constructor() {
+    super(
+      new THREE.SphereGeometry(5, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffff00 })
+    );
+  }
+}
+
 // Visualizer (Class): A StewartSimulator Graphics module class.
 // Manages the graphical visualization of the platform. Uses WebGL via THREE.js
 class Visualizer {
   constructor() {
     this._settings = new VisualizerSettings();
-    this._clock = new THREE.Clock();
     this._width = null;
     this._height = null;
     this._scene = null;
@@ -307,6 +315,7 @@ class Visualizer {
     this._cameraManager = null;
     this._cameraControlsManager = null;
     this._mechanism = null;
+    this._target = null;
   }
 
   init(mount) {
@@ -355,14 +364,45 @@ class Visualizer {
     let axisHelper = new THREE.AxesHelper(250 * this._settings.distanceScale);
     this._scene.add(axisHelper);
 
+    ////////////////////////////////////////////////////////////////////
+    this._target = new MoveableTarget();
+    this._target.position.set(0, 25, 100);
+    this._scene.add(this._target);
+    this._transformControls = null;
+
     this.animate();
   }
 
   addMechanism() {
     if (this._mechanism === undefined || this._mechanism === null) {
       this._mechanism = new Mechanism();
-      this._scene.add(this._mechanism.getGroup());
+      this._scene.add(this._mechanism);
     }
+  }
+
+  activateTargetMode() {
+    this.deactivateTargetMode();
+    this._cameraControlsManager.setCameraControlsEnabled(false);
+    this._transformControls = new TransformControls(
+      this._cameraManager.camera,
+      this._mount
+    );
+    this._transformControls.attach(this._target);
+    this._scene.add(this._transformControls);
+  }
+
+  deactivateTargetMode() {
+    if (
+      this._transformControls === undefined ||
+      this._transformControls === null
+    ) {
+      return;
+    }
+    this._transformControls.detach();
+    this._scene.remove(this._transformControls);
+    this._transformControls.dispose();
+    this._transformControls = null;
+    this._cameraControlsManager.setCameraControlsEnabled(true);
   }
 
   //Change the camera to the specified view and udpate the controls
@@ -409,56 +449,26 @@ class Visualizer {
       this._cameraControlsManager.updateControls();
     }
 
-    this.updateMechanism();
+    this.animateMechanism();
 
     this.render();
   }
 
-  sinBetween(min, max, t, speed = 1.0) {
-    let halfRange = (max - min) / 2;
-    return min + halfRange + Math.sin(speed * t) * halfRange;
-  }
-
-  updateMechanism() {
+  animateMechanism() {
     if (this._mechanism == null || this._mechanism === undefined) {
       return;
     }
 
-    let t = this._clock.getElapsedTime();
-
-    // YAW (oscillate base)
-    // let yawRange = Math.PI / 4;
-    // this._mechanism
-    //   .getGroup()
-    //   .setRotationFromAxisAngle(
-    //     pos_zAxis,
-    //     this.sinBetween(yawRange, -yawRange, t, 0.5)
-    //   );
-
-    // PITCH + Roll (oscillate platform)
-    let pitchRange = Math.PI / 20;
-    let rollRange = Math.PI / 30;
-    this._mechanism._base._platform_stand._platform
-      .getGroup()
-      .setRotationFromEuler(
-        new THREE.Euler(
-          this.sinBetween(rollRange, -rollRange, t, 5),
-          this.sinBetween(pitchRange, -pitchRange, t, 0.5),
-          0,
-          "XYZ"
-        )
+    if (
+      this._transformControls == null ||
+      this._transformControls === undefined
+    ) {
+      this._mechanism.animateRandom();
+    } else {
+      this._mechanism.animateTracking(
+        this._target.getWorldPosition(new THREE.Vector3())
       );
-
-    // Animate servo horns
-    let angleServoLeft = this._mechanism.getServoAngle_Left();
-    this._mechanism._base._servo_PitchRoll_left._horn
-      .getGroup()
-      .setRotationFromAxisAngle(pos_yAxis, angleServoLeft);
-
-    let angleServoRight = this._mechanism.getServoAngle_Right();
-    this._mechanism._base._servo_PitchRoll_right._horn
-      .getGroup()
-      .setRotationFromAxisAngle(pos_yAxis, -angleServoRight);
+    }
   }
 
   render() {

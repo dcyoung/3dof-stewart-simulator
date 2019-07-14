@@ -13,6 +13,11 @@ function MiscSettings() {
         size="lg"
         block
         onClick={() => {
+          if (
+            vizContext.visualizer._mechanism === undefined ||
+            vizContext.visualizer._mechanism === null
+          )
+            return;
           let value = vizContext.visualizer._mechanism.getServoAngle_Left();
           console.log(value);
         }}

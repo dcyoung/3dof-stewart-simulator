@@ -50,6 +50,32 @@ function BackgroundColorSelector() {
   );
 }
 
+function TargetControlSelector() {
+  const dispatch = useContext(VisualizerDispatchContext);
+  return (
+    <NavDropdown title="Target Control" id="basic-nav-dropdown">
+      <NavDropdown.Item
+        onClick={() =>
+          dispatch({
+            type: "deactivate_target_control"
+          })
+        }
+      >
+        Off
+      </NavDropdown.Item>
+      <NavDropdown.Item
+        onClick={() =>
+          dispatch({
+            type: "activate_target_control"
+          })
+        }
+      >
+        On
+      </NavDropdown.Item>
+    </NavDropdown>
+  );
+}
+
 function Toolbar() {
   return (
     <Navbar bg="light" expand="lg">
@@ -59,6 +85,7 @@ function Toolbar() {
         <Nav className="mr-auto">
           <CameraViewSelector />
           <BackgroundColorSelector />
+          <TargetControlSelector />
         </Nav>
       </Navbar.Collapse>
     </Navbar>
