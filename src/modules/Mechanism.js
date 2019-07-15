@@ -11,7 +11,7 @@ const DefaultParameters = {
   // base
   dist_base_servo_long: 20, // longitudinal distance between the base's center and a servo
   dist_base_servo_lat: 20, // lateral distance between the base's center and a servo
-  angle_base_servo_mount: Math.PI / 2 - Math.PI / 3,
+  angle_base_servo_mount: Math.PI / 6,
 
   // servo horn
   length_servo_horn: 12, // distance between servo horn axis of rotation and an anchor
@@ -167,6 +167,31 @@ class Mechanism extends THREE.Group {
       );
   }
 
+  // FIXME:
+  getServoAngle_Left() {
+    // base frame vector from origin of base to platform anchor point
+    let q = this.getQVec_Left();
+    // base frame vector from origin of base to center of servo arm rotation
+    let B = this.getBVec_Left();
+    // length of servo arm
+    let a = this._parameters.length_servo_horn;
+    // distance between the center of servo arm rotation and the platform anchor point
+    let l = this.getlDist_Left();
+    // length of the connecting rod
+    let s = this._parameters.length_connecting_rod;
+    // angle of servo horn plane relative to base x-axis
+    let beta = Math.PI - this._parameters.angle_base_servo_mount;
+    // the calculated servo angle (expects vectors with for Z-up)
+    return calcServoAngle(
+      new THREE.Vector3(q.x, q.z, q.y),
+      new THREE.Vector3(B.x, B.z, B.y),
+      a,
+      l,
+      s,
+      beta
+    );
+  }
+
   getServoAngle_Right() {
     // base frame vector from origin of base to platform anchor point
     let q = this.getQVec_Right();
@@ -180,16 +205,32 @@ class Mechanism extends THREE.Group {
     let s = this._parameters.length_connecting_rod;
     // angle of servo horn plane relative to base x-axis
     let beta = -this._parameters.angle_base_servo_mount;
-    // the calculated servo angle
-    return -calcServoAngle(q, B, a, l, s, beta);
+    // the calculated servo angle (expects vectors with for Z-up)
+    return -calcServoAngle(
+      new THREE.Vector3(q.x, q.z, q.y),
+      new THREE.Vector3(B.x, B.z, B.y),
+      a,
+      l,
+      s,
+      beta
+    );
   }
 
   updateServos() {
     // Animate servo horns
     const pos_yAxis = new THREE.Vector3(0, 1, 0);
-    // this._servo_PitchRoll_left
-    //   .getHorn()
-    //   .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Left());
+    // FIXME:
+    // console.log([
+    //   // this.getlDist_Left().toFixed(2),
+    //   // this.getlDist_Right().toFixed(2),
+    //   this.getServoAngle_Left().toFixed(2),
+    //   this.getServoAngle_Right().toFixed(2)
+    //   // this.getConnectingRodLength_Left().toFixed(2),
+    //   // this.getConnectingRodLength_Right().toFixed(2)
+    // ]);
+    this._servo_PitchRoll_left
+      .getHorn()
+      .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Left());
 
     this._servo_PitchRoll_right
       .getHorn()
@@ -205,12 +246,12 @@ class Mechanism extends THREE.Group {
     //     pos_zAxis,
     //     this.sinBetween(yawRange, -yawRange, t, 0.5)
     //   );
-    
+
     // console.log(this.getConnectingRodLength_Right());
 
     // PITCH + Roll (oscillate platform)
-    let pitchRange = Math.PI / 20;
-    let rollRange = Math.PI / 30;
+    let pitchRange = 0; //Math.PI / 20;
+    let rollRange = 0; // Math.PI / 30;
     this._platform.setRotationFromEuler(
       new THREE.Euler(
         sinBetween(pitchRange, -pitchRange, t, 0.5),
