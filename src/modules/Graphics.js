@@ -151,7 +151,7 @@ class CameraManager {
     this.previousViewType = null;
     this.orthoCam = null;
     this.perspectiveCam = null;
-    this.startingCamDistance = 100;
+    this.startingCamDistance = 75;
   }
   //initialize the camera to a perspective view
   initCamera() {
@@ -297,8 +297,8 @@ class MoveableTarget extends THREE.Mesh {
 // Visualizer (Class): A StewartSimulator Graphics module class.
 // Manages the graphical visualization of the platform. Uses WebGL via THREE.js
 class Visualizer {
-  constructor() {
-    this._settings = new VisualizerSettings();
+  constructor(settings = new VisualizerSettings()) {
+    this._settings = settings;
     this._width = null;
     this._height = null;
     this._scene = null;
