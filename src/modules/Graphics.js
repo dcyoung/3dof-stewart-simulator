@@ -8,7 +8,7 @@ import { Mechanism } from "./Mechanism";
 // const pos_xAxis = new THREE.Vector3(1, 0, 0);
 // const neg_xAxis = new THREE.Vector3(-1, 0, 0);
 const pos_yAxis = new THREE.Vector3(0, 1, 0);
-const neg_yAxis = new THREE.Vector3(0, -1, 0);
+// const neg_yAxis = new THREE.Vector3(0, -1, 0);
 const pos_zAxis = new THREE.Vector3(0, 0, 1);
 // const neg_zAxis = new THREE.Vector3(0, 0, -1);
 // const scene_origin = new THREE.Vector3(0, 0, 0);
@@ -183,39 +183,31 @@ class CameraManager {
         this.camera.position.set(0, this.startingCamDistance, 0);
         break;
       case CameraViewEnum.ORTHO_FRONT:
-        this.camera.position.set(0, -this.startingCamDistance, 0);
-        this.camera.up = pos_zAxis; //set up vectors so that the pan function from the OrthographicTrackballControls will work properly
-        this.camera.rotateX(Math.PI / 2);
+        this.camera.position.set(0, 0, this.startingCamDistance);
+        this.camera.up = pos_yAxis; //set up vectors so that the pan function from the OrthographicTrackballControls will work properly
         break;
       case CameraViewEnum.ORTHO_BACK:
-        this.camera.position.set(0, this.startingCamDistance, 0);
-        this.camera.up = pos_zAxis;
-        this.camera.rotateX(-Math.PI / 2);
-        this.camera.rotateZ(Math.PI);
+        this.camera.position.set(0, 0, -this.startingCamDistance);
+        this.camera.up = pos_yAxis;
         break;
       case CameraViewEnum.ORTHO_LEFT:
         this.camera.position.set(-this.startingCamDistance, 0, 0);
-        this.camera.up = pos_zAxis;
-        this.camera.rotateY(-Math.PI / 2);
-        this.camera.rotateZ(-Math.PI / 2);
+        this.camera.up = pos_yAxis;
         break;
       case CameraViewEnum.ORTHO_RIGHT:
         this.camera.position.set(this.startingCamDistance, 0, 0);
-        this.camera.up = pos_zAxis;
-        this.camera.rotateY(Math.PI / 2);
-        this.camera.rotateZ(Math.PI / 2);
-        break;
-      case CameraViewEnum.ORTHO_TOP:
-        this.camera.position.set(0, 0, this.startingCamDistance);
         this.camera.up = pos_yAxis;
         break;
+      case CameraViewEnum.ORTHO_TOP:
+        this.camera.position.set(0, this.startingCamDistance, 0);
+        this.camera.up = pos_zAxis;
+        break;
       case CameraViewEnum.ORTHO_BOTTOM:
-        this.camera.position.set(0, 0, -this.startingCamDistance);
-        this.camera.up = neg_yAxis;
-        this.camera.rotateX(Math.PI);
+        this.camera.position.set(0, -this.startingCamDistance, 0);
+        this.camera.up = pos_zAxis;
         break;
       default:
-        break;
+        throw Error(`Unexpected viewtype: ${theViewType}.`);
     }
   }
 

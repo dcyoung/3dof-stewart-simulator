@@ -53,9 +53,9 @@ class Mechanism extends THREE.Group {
       0,
       -this._parameters.dist_base_servo_long
     );
-    this._servo_PitchRoll_left.rotateX(Math.PI / 2);
+    this._servo_PitchRoll_left.rotateX(-Math.PI / 2);
     this._servo_PitchRoll_left.rotateZ(
-      Math.PI + this._parameters.angle_base_servo_mount
+      -this._parameters.angle_base_servo_mount
     );
     this._base.add(this._servo_PitchRoll_left);
 
@@ -132,7 +132,9 @@ class Mechanism extends THREE.Group {
     // initialize with the world position of the center of servo arm rotation
     // then convert the world position to local "base" space
     return this._base.worldToLocal(
-      this._servo_PitchRoll_left.getHorn().getWorldPosition(new THREE.Vector3())
+      this._servo_PitchRoll_left
+        .getHorn()
+        .getWorldPosition(new THREE.Vector3())
     );
   }
 
@@ -180,9 +182,10 @@ class Mechanism extends THREE.Group {
     // length of the connecting rod
     let s = this._parameters.length_connecting_rod;
     // angle of servo horn plane relative to base x-axis
+    // let beta = Math.PI - this._parameters.angle_base_servo_mount;
     let beta = Math.PI - this._parameters.angle_base_servo_mount;
     // the calculated servo angle (expects vectors with for Z-up)
-    return calcServoAngle(
+    return Math.PI + calcServoAngle(
       new THREE.Vector3(q.x, q.z, q.y),
       new THREE.Vector3(B.x, B.z, B.y),
       a,
@@ -221,13 +224,14 @@ class Mechanism extends THREE.Group {
     const pos_yAxis = new THREE.Vector3(0, 1, 0);
     // FIXME:
     // console.log([
-    //   // this.getlDist_Left().toFixed(2),
-    //   // this.getlDist_Right().toFixed(2),
-    //   this.getServoAngle_Left().toFixed(2),
-    //   this.getServoAngle_Right().toFixed(2)
-    //   // this.getConnectingRodLength_Left().toFixed(2),
-    //   // this.getConnectingRodLength_Right().toFixed(2)
+    //   // // this.getlDist_Left().toFixed(2),
+    //   // // // this.getlDist_Right().toFixed(2),
+    // //   this.getServoAngle_Left().toFixed(2),
+    // //   this.getServoAngle_Right().toFixed(2)
+    //   this.getConnectingRodLength_Left().toFixed(2),
+    //   this.getConnectingRodLength_Right().toFixed(2)
     // ]);
+    
     this._servo_PitchRoll_left
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Left());
@@ -241,17 +245,16 @@ class Mechanism extends THREE.Group {
     let t = this._clock.getElapsedTime();
 
     // YAW (oscillate base)
-    // let yawRange = Math.PI / 4;
-    // this..setRotationFromAxisAngle(
-    //     pos_zAxis,
-    //     this.sinBetween(yawRange, -yawRange, t, 0.5)
-    //   );
-
-    // console.log(this.getConnectingRodLength_Right());
+    const pos_yAxis = new THREE.Vector3(0, 1, 0);
+    let yawRange = Math.PI / 4;
+    this._base.setRotationFromAxisAngle(
+        pos_yAxis,
+        sinBetween(yawRange, -yawRange, t, 0.5)
+      );
 
     // PITCH + Roll (oscillate platform)
-    let pitchRange = 0; //Math.PI / 20;
-    let rollRange = 0; // Math.PI / 30;
+    let pitchRange = Math.PI / 20;
+    let rollRange = Math.PI / 30;
     this._platform.setRotationFromEuler(
       new THREE.Euler(
         sinBetween(pitchRange, -pitchRange, t, 0.5),
