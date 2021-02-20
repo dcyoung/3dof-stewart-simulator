@@ -308,6 +308,8 @@ class Visualizer {
     this._cameraControlsManager = null;
     this._mechanism = null;
     this._target = null;
+    this._labelContainerElem = null
+    this._labelElementByName = null
   }
 
   init(mount) {
@@ -362,6 +364,11 @@ class Visualizer {
     this._scene.add(this._target);
     this._transformControls = null;
 
+    ////////////////////////////////////////////////////////////////////
+    this._labelElementByName = {}
+    this._labelContainerElem = document.querySelector('#overlay-labels');
+
+    ////////////////////////////////////////////////////////////////////
     this.animate();
   }
 
@@ -369,6 +376,13 @@ class Visualizer {
     if (this._mechanism === undefined || this._mechanism === null) {
       this._mechanism = new Mechanism();
       this._scene.add(this._mechanism);
+
+      ["servoLeft", "servoRight"].forEach(name => {
+        const elem = document.createElement("div");
+        elem.textContent = name;
+        this._labelContainerElem.appendChild(elem);
+        this._labelElementByName[name] = elem;
+      });
     }
   }
 
@@ -461,6 +475,33 @@ class Visualizer {
         this._target.getWorldPosition(new THREE.Vector3())
       );
     }
+
+    // update the display text for left and right servo
+    this.animateServoDetails(
+      this._labelElementByName["servoLeft"],
+      this._mechanism._servo_PitchRoll_left,
+      `Rad: ${this._mechanism.getServoAngle_Left().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Left().toFixed(2)}`
+    )
+    this.animateServoDetails(
+      this._labelElementByName["servoRight"],
+      this._mechanism._servo_PitchRoll_right,
+      `Rad: ${this._mechanism.getServoAngle_Right().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Right().toFixed(2)}`
+    )
+  }
+
+  animateServoDetails(labelElem, servo, msg) {
+    const tempV = new THREE.Vector3();
+    servo.getWorldPosition(tempV);
+    // get the normalized screen coordinate of that position
+    // x and y will be in the -1 to +1 range with x = -1 being
+    // on the left and y = -1 being on the bottom
+    tempV.project(this._cameraManager.camera);
+    // convert the normalized position to CSS coordinates
+    const x = (tempV.x * .5 + .5) * this._width;
+    const y = (tempV.y * -.5 + .5) * this._height;
+    // move the elem to that position
+    labelElem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+    labelElem.textContent = msg
   }
 
   render() {

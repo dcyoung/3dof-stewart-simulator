@@ -17,7 +17,9 @@ class VisualizerDisplay extends React.Component {
         ref={mount => {
           this.mount = mount;
         }}
-      />
+      >
+        <div id="overlay-labels"></div>
+      </div>
     );
   }
 }
