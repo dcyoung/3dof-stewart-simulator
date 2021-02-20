@@ -6,14 +6,14 @@
   overflow: hidden;
 }
 
-#overlay-labels {
+#debug-hud {
   position: absolute;  /* let us position ourself inside the container */
   left: 0;             /* make our position the top left of the container */
   top: 0;
   color: white;
 }
 
-#overlay-labels>div {
+#debug-hud>div {
   position: absolute;  /* let us position them inside the container */
   left: 0;             /* make their default position the top left of the container */
   top: 0;
@@ -31,6 +31,6 @@
     -1px  0   0 #000;
 }
 
-#overlayLabels>div:hover {
+#debug-hud>div:hover {
   color: red;
 }

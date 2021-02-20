@@ -222,16 +222,6 @@ class Mechanism extends THREE.Group {
   updateServos() {
     // Animate servo horns
     const pos_yAxis = new THREE.Vector3(0, 1, 0);
-    // FIXME:
-    // console.log([
-    //   // // this.getlDist_Left().toFixed(2),
-    //   // // // this.getlDist_Right().toFixed(2),
-    // //   this.getServoAngle_Left().toFixed(2),
-    // //   this.getServoAngle_Right().toFixed(2)
-    //   this.getConnectingRodLength_Left().toFixed(2),
-    //   this.getConnectingRodLength_Right().toFixed(2)
-    // ]);
-    
     this._servo_PitchRoll_left
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Left());
@@ -241,35 +231,46 @@ class Mechanism extends THREE.Group {
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Right());
   }
 
-  animateRandom() {
+  simulateMotion() {
     let t = this._clock.getElapsedTime();
 
     // YAW (oscillate base)
-    const pos_yAxis = new THREE.Vector3(0, 1, 0);
     let yawRange = Math.PI / 4;
-    this._base.setRotationFromAxisAngle(
-        pos_yAxis,
-        sinBetween(yawRange, -yawRange, t, 0.5)
-      );
-
     // PITCH + Roll (oscillate platform)
     let pitchRange = Math.PI / 20;
     let rollRange = Math.PI / 30;
+
+    this.setFinalOrientation(
+      sinBetween(yawRange, -yawRange, t, 0.5), // yaw
+      sinBetween(pitchRange, -pitchRange, t, 0.5), // pitch
+      sinBetween(rollRange, -rollRange, t, 5), // roll
+    )
+  }
+
+  setFinalOrientation(yaw, pitch, roll) {
+    const pos_yAxis = new THREE.Vector3(0, 1, 0);
+    // YAW (oscillate base)
+    this._base.setRotationFromAxisAngle(
+        pos_yAxis,
+        yaw
+      );
+
+    // PITCH + Roll (oscillate platform)
     this._platform.setRotationFromEuler(
       new THREE.Euler(
-        sinBetween(pitchRange, -pitchRange, t, 0.5),
+        pitch,
         0,
-        sinBetween(rollRange, -rollRange, t, 5),
+        roll,
         "XYZ"
       )
     );
-
-    this.updateServos();
   }
 
-  animateTracking(target) {
+  trackTarget(target) {
     this._platform.lookAt(target);
+  }
 
+  animate() {
     this.updateServos();
   }
 }

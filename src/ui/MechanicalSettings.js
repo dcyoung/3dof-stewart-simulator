@@ -12,10 +12,11 @@ function MechanicalSettings() {
         variant="primary"
         size="lg"
         block
-        onClick={() =>
-          dispatch({
-            type: "add_mechanism"
-          })
+        onClick={() => {
+            dispatch({
+              type: "add_mechanism"
+            })
+          }
         }
       >
         Add Mechanism

@@ -1,5 +1,5 @@
 import React from "react";
-import { Visualizer } from "../modules/Graphics";
+import { Visualizer, DebugHUD, MechanismDebugHudComponent } from "../modules/Graphics";
 
 const VisualizerStateContext = React.createContext();
 const VisualizerDispatchContext = React.createContext();
@@ -7,7 +7,9 @@ const VisualizerDispatchContext = React.createContext();
 function visualizerReducer(state, action) {
   switch (action.type) {
     case "init": {
-      state.visualizer.init(action.mount);
+      state.visualizer.init(action.visualizerMount);
+      state.debugHUD.init(action.hudMount, state.visualizer);
+      state.visualizer.addAnimHook(state.debugHUD);
       return state;
     }
     case "change_view": {
@@ -27,7 +29,10 @@ function visualizerReducer(state, action) {
       return state;
     }
     case "add_mechanism": {
-      state.visualizer.addMechanism();
+      if (state.visualizer._mechanism === null) {
+        state.visualizer.addMechanism();
+        state.debugHUD.addHUDComponent(new MechanismDebugHudComponent());
+      }
       return state;
     }
     default: {
@@ -38,7 +43,8 @@ function visualizerReducer(state, action) {
 
 function VisualizerProvider({ children }) {
   const [state, dispatch] = React.useReducer(visualizerReducer, {
-    visualizer: new Visualizer()
+    visualizer: new Visualizer(),
+    debugHUD: new DebugHUD(),
   });
   return (
     <VisualizerStateContext.Provider value={state}>

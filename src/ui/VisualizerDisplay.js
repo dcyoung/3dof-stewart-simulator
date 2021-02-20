@@ -7,7 +7,7 @@ class VisualizerDisplay extends React.Component {
 
   componentDidMount() {
     const dispatch = this.context;
-    dispatch({ type: "init", mount: this.mount });
+    dispatch({ type: "init", visualizerMount: this.visualizerMount, hudMount: this.hudMount });
   }
 
   render() {
@@ -15,10 +15,15 @@ class VisualizerDisplay extends React.Component {
       <div
         className="Visualizer-window"
         ref={mount => {
-          this.mount = mount;
+          this.visualizerMount = mount;
         }}
       >
-        <div id="overlay-labels"></div>
+        <div 
+          id="debug-hud"
+          ref = {mount => {
+            this.hudMount = mount;
+          }}
+        />
       </div>
     );
   }

@@ -294,6 +294,86 @@ class MoveableTarget extends THREE.Mesh {
   }
 }
 
+class MechanismDebugHudComponent {
+  constructor() {
+    this._mount = null;
+    this._visualizer = null;
+    this._mechanism = null;
+    this._elemServoLeft = null;
+    this._elemServoRight = null;
+  }
+
+  init(mount, visualizer) {
+    this._mount = mount;
+    this._visualizer = visualizer;
+    this._mechanism = visualizer._mechanism;
+
+    ////////////////////////////////////////////////////////////////////
+    this._elemServoLeft = document.createElement("div");
+    this._elemServoLeft.textContent = "debug_left";
+    this._mount.appendChild(this._elemServoLeft);
+
+    ////////////////////////////////////////////////////////////////////
+    this._elemServoRight = document.createElement("div");
+    this._elemServoRight.textContent = "debug_right";
+    this._mount.appendChild(this._elemServoRight);
+  }
+
+  animate() {
+    // update the display text for left and right servo
+    this.animateServoDetails(
+      this._elemServoLeft,
+      this._mechanism._servo_PitchRoll_left,
+      `Rad: ${this._mechanism.getServoAngle_Left().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Left().toFixed(2)}`
+    )
+    this.animateServoDetails(
+      this._elemServoRight,
+      this._mechanism._servo_PitchRoll_right,
+      `Rad: ${this._mechanism.getServoAngle_Right().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Right().toFixed(2)}`
+    )
+  }
+
+  animateServoDetails(labelElem, servo, msg) {
+    const tempV = new THREE.Vector3();
+    servo.getWorldPosition(tempV);
+    // get the normalized screen coordinate of that position
+    // x and y will be in the -1 to +1 range with x = -1 being
+    // on the left and y = -1 being on the bottom
+    tempV.project(this._visualizer._cameraManager.camera);
+    // convert the normalized position to CSS coordinates
+    const x = (tempV.x * .5 + .5) * this._visualizer._width;
+    const y = (tempV.y * -.5 + .5) * this._visualizer._height;
+    // move the elem to that position
+    labelElem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+    labelElem.textContent = msg
+  }
+}
+
+class DebugHUD {
+  constructor() {
+    this._mount = null;
+    this._visualizer = null;
+    this._components = []
+  }
+
+  init(mount, visualizer) {
+    this._mount = mount;
+    this._visualizer = visualizer;
+    this.animate();
+  }
+
+  addHUDComponent(component) {
+    component.init(this._mount, this._visualizer)
+    this._components.push(component);
+  }
+
+  animate() {
+    this._components.forEach(component => {
+      component.animate();
+    });
+  }
+}
+
 // Visualizer (Class): A StewartSimulator Graphics module class.
 // Manages the graphical visualization of the platform. Uses WebGL via THREE.js
 class Visualizer {
@@ -308,8 +388,8 @@ class Visualizer {
     this._cameraControlsManager = null;
     this._mechanism = null;
     this._target = null;
-    this._labelContainerElem = null
-    this._labelElementByName = null
+    this._animHooks = null;
+    this._simulateMotion = false;
   }
 
   init(mount) {
@@ -365,25 +445,32 @@ class Visualizer {
     this._transformControls = null;
 
     ////////////////////////////////////////////////////////////////////
-    this._labelElementByName = {}
-    this._labelContainerElem = document.querySelector('#overlay-labels');
+    this._animHooks = [];
 
     ////////////////////////////////////////////////////////////////////
     this.animate();
+  }
+
+  toggleMechanismSimulatedMotion() {
+    this._simulateMotion = !this._simulateMotion;
+  }
+
+  resetMechanismOrientation() {
+    if (this._mechanism === undefined || this._mechanism === null) {
+      return;
+    }
+    this._mechanism.setFinalOrientation(0, 0, 0);
   }
 
   addMechanism() {
     if (this._mechanism === undefined || this._mechanism === null) {
       this._mechanism = new Mechanism();
       this._scene.add(this._mechanism);
-
-      ["servoLeft", "servoRight"].forEach(name => {
-        const elem = document.createElement("div");
-        elem.textContent = name;
-        this._labelContainerElem.appendChild(elem);
-        this._labelElementByName[name] = elem;
-      });
     }
+  }
+
+  addAnimHook(hook) {
+    this._animHooks.push(hook);
   }
 
   activateTargetMode() {
@@ -456,7 +543,9 @@ class Visualizer {
     }
 
     this.animateMechanism();
-
+    this._animHooks.forEach(hook => {
+      hook.animate();
+    });
     this.render();
   }
 
@@ -469,43 +558,19 @@ class Visualizer {
       this._transformControls == null ||
       this._transformControls === undefined
     ) {
-      this._mechanism.animateRandom();
+      if (this._simulateMotion) {
+        this._mechanism.simulateMotion();
+      }
     } else {
-      this._mechanism.animateTracking(
+      this._mechanism.trackTarget(
         this._target.getWorldPosition(new THREE.Vector3())
       );
     }
-
-    // update the display text for left and right servo
-    this.animateServoDetails(
-      this._labelElementByName["servoLeft"],
-      this._mechanism._servo_PitchRoll_left,
-      `Rad: ${this._mechanism.getServoAngle_Left().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Left().toFixed(2)}`
-    )
-    this.animateServoDetails(
-      this._labelElementByName["servoRight"],
-      this._mechanism._servo_PitchRoll_right,
-      `Rad: ${this._mechanism.getServoAngle_Right().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Right().toFixed(2)}`
-    )
-  }
-
-  animateServoDetails(labelElem, servo, msg) {
-    const tempV = new THREE.Vector3();
-    servo.getWorldPosition(tempV);
-    // get the normalized screen coordinate of that position
-    // x and y will be in the -1 to +1 range with x = -1 being
-    // on the left and y = -1 being on the bottom
-    tempV.project(this._cameraManager.camera);
-    // convert the normalized position to CSS coordinates
-    const x = (tempV.x * .5 + .5) * this._width;
-    const y = (tempV.y * -.5 + .5) * this._height;
-    // move the elem to that position
-    labelElem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
-    labelElem.textContent = msg
+    this._mechanism.animate();
   }
 
   render() {
     this._renderer.render(this._scene, this._cameraManager.camera);
   }
 }
-export { Visualizer, BackgroundColorEnum, CameraViewEnum };
+export { Visualizer, DebugHUD, MechanismDebugHudComponent, BackgroundColorEnum, CameraViewEnum };
