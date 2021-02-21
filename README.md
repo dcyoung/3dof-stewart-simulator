@@ -2,7 +2,7 @@
 
 An interactive graphical simulator for the inverse kinematics of a 3DOF stewart platform.
 
-![Simulator Viz](docs/images/simulator.JPG)
+![Simulator Viz](docs/images/simulator.jpg)
 
 ## Quickstart
 
