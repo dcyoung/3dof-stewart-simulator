@@ -13,6 +13,10 @@ const pos_zAxis = new THREE.Vector3(0, 0, 1);
 // const neg_zAxis = new THREE.Vector3(0, 0, -1);
 // const scene_origin = new THREE.Vector3(0, 0, 0);
 
+function vectorToFixedString(v, fractionDigits=1){
+  return `${v.x.toFixed(fractionDigits)},${v.y.toFixed(fractionDigits)},${v.z.toFixed(fractionDigits)}`
+}
+
 const CameraViewEnum = {
   PERSPECTIVE: 1,
   ORTHO_TOP: 2,
@@ -299,8 +303,15 @@ class MechanismDebugHudComponent {
     this._mount = null;
     this._visualizer = null;
     this._mechanism = null;
-    this._elemServoLeft = null;
-    this._elemServoRight = null;
+    this._dispServoLeft = null;
+    this._dispServoRight = null;
+    this._dispServoHornLeft = null;
+    this._dispServoHornRight = null;
+    this._dispPlatformAnchorLeft = null;
+    this._dispPlatformAnchorRight = null;
+    this._dispConnectingRodLeft = null;
+    this._dispConnectingRodRight = null;
+    // this._dispExtra = null;
   }
 
   init(mount, visualizer) {
@@ -309,43 +320,118 @@ class MechanismDebugHudComponent {
     this._mechanism = visualizer._mechanism;
 
     ////////////////////////////////////////////////////////////////////
-    this._elemServoLeft = document.createElement("div");
-    this._elemServoLeft.textContent = "debug_left";
-    this._mount.appendChild(this._elemServoLeft);
+    this._dispServoLeft = document.createElement("div");
+    this._dispServoRight = document.createElement("div");
+    this._dispServoHornLeft = document.createElement("div");
+    this._dispServoHornRight = document.createElement("div");
+    this._dispPlatformAnchorLeft = document.createElement("div");
+    this._dispPlatformAnchorRight = document.createElement("div");
+    this._dispConnectingRodLeft = document.createElement("div");
+    this._dispConnectingRodRight = document.createElement("div");
+    // this._dispExtra = document.createElement("div");
 
-    ////////////////////////////////////////////////////////////////////
-    this._elemServoRight = document.createElement("div");
-    this._elemServoRight.textContent = "debug_right";
-    this._mount.appendChild(this._elemServoRight);
+    [
+      this._dispServoLeft,
+      this._dispServoRight,
+      this._dispServoHornLeft,
+      this._dispServoHornRight,
+      this._dispPlatformAnchorLeft,
+      this._dispPlatformAnchorRight,
+      this._dispConnectingRodLeft,
+      this._dispConnectingRodRight,
+      // this._dispExtra,
+    ].forEach(elem => {
+        elem.textContent = "placeholder";
+        this._mount.appendChild(elem);
+    });
   }
 
   animate() {
+    ////////////////////////////////////////////////////////////////////
     // update the display text for left and right servo
-    this.animateServoDetails(
-      this._elemServoLeft,
-      this._mechanism._servo_PitchRoll_left,
-      `Rad: ${this._mechanism.getServoAngle_Left().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Left().toFixed(2)}`
+    this.updateElement(
+      this._dispServoLeft,
+      this._mechanism._servo_PitchRoll_left.getWorldPosition(new THREE.Vector3()),
+      `Rotation: ${this._mechanism.getServoAngle_Left().toFixed(2)}rad`
     )
-    this.animateServoDetails(
-      this._elemServoRight,
-      this._mechanism._servo_PitchRoll_right,
-      `Rad: ${this._mechanism.getServoAngle_Right().toFixed(2)}, Len: ${this._mechanism.getConnectingRodLength_Right().toFixed(2)}`
+    this.updateElement(
+      this._dispServoRight,
+      this._mechanism._servo_PitchRoll_right.getWorldPosition(new THREE.Vector3()),
+      `Rotation: ${this._mechanism.getServoAngle_Right().toFixed(2)}rad`
     )
+
+    ////////////////////////////////////////////////////////////////////
+    // update the display text for left and right connecting rods
+    this.updateElement(
+      this._dispConnectingRodLeft,
+      this._mechanism.getConnectingRodMidPoint_Left_WorldPosition(),
+      `Len: ${this._mechanism.getConnectingRodLength_Left().toFixed(2)}`
+    )
+    this.updateElement(
+      this._dispConnectingRodRight,
+      this._mechanism.getConnectingRodMidPoint_Right_WorldPosition(),
+      `Len: ${this._mechanism.getConnectingRodLength_Right().toFixed(2)}`
+    )
+
+    ////////////////////////////////////////////////////////////////////
+    // update the display text for left and right servo horn anchors
+    const hornBjLeft = this._mechanism._servo_PitchRoll_left
+      .getHorn()
+      .getBallJoint()
+      .getWorldPosition(new THREE.Vector3());
+    this.updateElement(
+      this._dispServoHornLeft,
+      hornBjLeft,
+      vectorToFixedString(hornBjLeft)
+    )
+    const hornBjRight = this._mechanism._servo_PitchRoll_right
+      .getHorn()
+      .getBallJoint()
+      .getWorldPosition(new THREE.Vector3());
+    this.updateElement(
+      this._dispServoHornRight,
+      hornBjRight,
+      vectorToFixedString(hornBjRight)
+    )
+
+    ////////////////////////////////////////////////////////////////////
+    // update the display text for left and right platform anchors
+    const platformAnchorLeft = this._mechanism._platform
+      .getBallJointLeft()
+      .getWorldPosition(new THREE.Vector3());
+    this.updateElement(
+      this._dispPlatformAnchorLeft,
+      platformAnchorLeft,
+      vectorToFixedString(platformAnchorLeft)
+    )
+    const platformAnchorRight = this._mechanism._platform
+      .getBallJointRight()
+      .getWorldPosition(new THREE.Vector3());
+    this.updateElement(
+      this._dispPlatformAnchorRight,
+      platformAnchorRight,
+      vectorToFixedString(platformAnchorRight)
+    )
+
+    ////////////////////////////////////////////////////////////////////
+    // this.updateElement(
+    //   this._dispExtra,
+    //   new THREE.Vector3(),
+    //   "origin"
+    // )
   }
 
-  animateServoDetails(labelElem, servo, msg) {
-    const tempV = new THREE.Vector3();
-    servo.getWorldPosition(tempV);
+  updateElement(dispElem, worldPosition, msg) {
     // get the normalized screen coordinate of that position
     // x and y will be in the -1 to +1 range with x = -1 being
     // on the left and y = -1 being on the bottom
-    tempV.project(this._visualizer._cameraManager.camera);
+    worldPosition.project(this._visualizer._cameraManager.camera);
     // convert the normalized position to CSS coordinates
-    const x = (tempV.x * .5 + .5) * this._visualizer._width;
-    const y = (tempV.y * -.5 + .5) * this._visualizer._height;
+    const x = (worldPosition.x * .5 + .5) * this._visualizer._width;
+    const y = (worldPosition.y * -.5 + .5) * this._visualizer._height;
     // move the elem to that position
-    labelElem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
-    labelElem.textContent = msg
+    dispElem.style.transform = `translate(-50%, -50%) translate(${x}px,${y}px)`;
+    dispElem.textContent = msg
   }
 }
 

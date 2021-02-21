@@ -109,6 +109,32 @@ class Mechanism extends THREE.Group {
       );
   }
 
+  getConnectingRodMidPoint_Left_WorldPosition() {
+    return getPointInBetweenByPerc(
+      this._servo_PitchRoll_left
+        .getHorn()
+        .getBallJoint()
+        .getWorldPosition(new THREE.Vector3()), 
+      this._platform
+        .getBallJointLeft()
+        .getWorldPosition(new THREE.Vector3()),
+      0.5
+    );
+  }
+
+  getConnectingRodMidPoint_Right_WorldPosition() {
+    return getPointInBetweenByPerc(
+      this._servo_PitchRoll_right
+        .getHorn()
+        .getBallJoint()
+        .getWorldPosition(new THREE.Vector3()), 
+      this._platform
+        .getBallJointRight()
+        .getWorldPosition(new THREE.Vector3()),
+      0.5
+    );
+  }
+
   // base frame vector from origin of base to platform anchor point
   getQVec_Left() {
     // initialize with the world position of the platform anchor point
@@ -169,7 +195,8 @@ class Mechanism extends THREE.Group {
       );
   }
 
-  // FIXME:
+  // FIXME: currently leveraging a simulated reflection so the math works... 
+  // would be nice to resolve for expected coordinate system
   getServoAngle_Left() {
     // base frame vector from origin of base to platform anchor point
     let q = this.getQVec_Left();
@@ -181,13 +208,15 @@ class Mechanism extends THREE.Group {
     let l = this.getlDist_Left();
     // length of the connecting rod
     let s = this._parameters.length_connecting_rod;
+    
     // angle of servo horn plane relative to base x-axis
-    // let beta = Math.PI - this._parameters.angle_base_servo_mount;
-    let beta = Math.PI - this._parameters.angle_base_servo_mount;
+    let beta = -this._parameters.angle_base_servo_mount;
+
     // the calculated servo angle (expects vectors with for Z-up)
     return Math.PI + calcServoAngle(
-      new THREE.Vector3(q.x, q.z, q.y),
-      new THREE.Vector3(B.x, B.z, B.y),
+      // simulate reflection of q and B vecs so the math from the flip scenario applies
+      new THREE.Vector3(-q.x, q.z, q.y),
+      new THREE.Vector3(-B.x, B.z, B.y),
       a,
       l,
       s,
@@ -401,6 +430,13 @@ class BallJoint extends THREE.Mesh {
       new THREE.MeshBasicMaterial({ color: color })
     );
   }
+}
+
+function getPointInBetweenByPerc(pointA, pointB, percentage) {
+  var dir = pointB.clone().sub(pointA);
+  var len = dir.length();
+  dir = dir.normalize().multiplyScalar(len*percentage);
+  return pointA.clone().add(dir);
 }
 
 export { Mechanism };
