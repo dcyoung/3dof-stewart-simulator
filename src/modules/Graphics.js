@@ -97,7 +97,7 @@ class CameraControlsManager {
           this.renderer.domElement
         );
         this.controlsMap[theViewType].noRotate = true;
-        this.controlsMap[theViewType].zoomSpeed = 0.1;
+        this.controlsMap[theViewType].zoomSpeed = 1.0;
         this.controlsMap[theViewType].panSpeed = 0.8;
         this.controlsMap[theViewType].staticMoving = true;
         this.controlsMap[theViewType].dynamicDampingFactor = 0.3;
@@ -166,11 +166,11 @@ class CameraManager {
   changeCamera(theViewType) {
     switch (theViewType) {
       case CameraViewEnum.PERSPECTIVE:
-        this.camera = this.createPerspectiveCamera();
+        this.camera = this.getOrCreatePerspectiveCamera();
         this.setCameraView(theViewType);
         break;
       default:
-        this.camera = this.createOrthographicCamera();
+        this.camera = this.getOrCreateOrthographicCamera();
         this.setCameraView(theViewType);
         break;
     }
@@ -216,7 +216,7 @@ class CameraManager {
   }
 
   //retrieves the perspective camera or creates one if it doesn't exist
-  createPerspectiveCamera() {
+  getOrCreatePerspectiveCamera() {
     if (!this.perspectiveCam) {
       // set some camera attributes
       let FOV = 90,
@@ -230,7 +230,7 @@ class CameraManager {
   }
 
   //retrieves the orthographic camera or creates one if it doesn't exist
-  createOrthographicCamera() {
+  getOrCreateOrthographicCamera() {
     if (!this.orthoCam) {
       this.orthoCam = new THREE.OrthographicCamera(
         this.WIDTH / -2,
@@ -240,6 +240,8 @@ class CameraManager {
         0.1,
         10000
       );
+      // starting zoom
+      this.orthoCam.zoom = 12.0;
     }
     return this.orthoCam;
   }
@@ -303,14 +305,22 @@ class MechanismDebugHudComponent {
     this._mount = null;
     this._visualizer = null;
     this._mechanism = null;
+
     this._dispServoLeft = null;
-    this._dispServoRight = null;
     this._dispServoHornLeft = null;
-    this._dispServoHornRight = null;
     this._dispPlatformAnchorLeft = null;
-    this._dispPlatformAnchorRight = null;
     this._dispConnectingRodLeft = null;
+
+    this._dispServoRight = null;
+    this._dispServoHornRight = null;
+    this._dispPlatformAnchorRight = null;
     this._dispConnectingRodRight = null;
+
+    this._dispServoYaw = null;
+    this._dispServoHornYaw = null;
+    this._dispPlatformStandAnchorYaw = null
+    this._dispConnectingRodYaw = null;
+
     // this._dispExtra = null;
   }
 
@@ -321,24 +331,34 @@ class MechanismDebugHudComponent {
 
     ////////////////////////////////////////////////////////////////////
     this._dispServoLeft = document.createElement("div");
-    this._dispServoRight = document.createElement("div");
     this._dispServoHornLeft = document.createElement("div");
-    this._dispServoHornRight = document.createElement("div");
     this._dispPlatformAnchorLeft = document.createElement("div");
-    this._dispPlatformAnchorRight = document.createElement("div");
     this._dispConnectingRodLeft = document.createElement("div");
+
+    this._dispServoRight = document.createElement("div");
+    this._dispServoHornRight = document.createElement("div");
+    this._dispPlatformAnchorRight = document.createElement("div");
     this._dispConnectingRodRight = document.createElement("div");
+    
+    this._dispServoYaw = document.createElement("div");
+    this._dispServoHornYaw = document.createElement("div");
+    this._dispPlatformStandAnchorYaw = document.createElement("div");
+    this._dispConnectingRodYaw = document.createElement("div");
     // this._dispExtra = document.createElement("div");
 
     [
       this._dispServoLeft,
-      this._dispServoRight,
       this._dispServoHornLeft,
-      this._dispServoHornRight,
       this._dispPlatformAnchorLeft,
-      this._dispPlatformAnchorRight,
       this._dispConnectingRodLeft,
+      this._dispServoRight,
+      this._dispServoHornRight,
+      this._dispPlatformAnchorRight,
       this._dispConnectingRodRight,
+      this._dispServoYaw,
+      this._dispServoHornYaw,
+      this._dispPlatformStandAnchorYaw,
+      this._dispConnectingRodYaw,
       // this._dispExtra,
     ].forEach(elem => {
         elem.textContent = "placeholder";
@@ -413,6 +433,35 @@ class MechanismDebugHudComponent {
       vectorToFixedString(platformAnchorRight)
     )
 
+    ////////////////////////////////////////////////////////////////////
+    // update the display text for yaw components
+    this.updateElement(
+      this._dispServoYaw,
+      this._mechanism._servo_Yaw.getWorldPosition(new THREE.Vector3()),
+      `Rotation: ${this._mechanism.getYawServoAngle().toFixed(2)}rad`
+    )
+    this.updateElement(
+      this._dispConnectingRodYaw,
+      this._mechanism.getYawConnectingRodMidPoint_WorldPosition(),
+      `Len: ${this._mechanism.getYawConnectingRodLength().toFixed(2)}`
+    )
+    const hornBjYaw = this._mechanism._servo_Yaw
+      .getHorn()
+      .getBallJoint()
+      .getWorldPosition(new THREE.Vector3());
+    this.updateElement(
+      this._dispServoHornYaw,
+      hornBjYaw,
+      vectorToFixedString(hornBjYaw)
+    )
+    const platformStandAnchor = this._mechanism._platformStand
+      .getBallJoint()
+      .getWorldPosition(new THREE.Vector3());
+    this.updateElement(
+      this._dispPlatformStandAnchorYaw,
+      platformStandAnchor,
+      vectorToFixedString(platformStandAnchor)
+    )
     ////////////////////////////////////////////////////////////////////
     // this.updateElement(
     //   this._dispExtra,
