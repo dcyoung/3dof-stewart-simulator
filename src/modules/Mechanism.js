@@ -1,7 +1,9 @@
 import * as THREE from "three";
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { calcServoAngle, solveIk2JointPlanar } from "./InverseKinematics";
 import { sinBetween } from "./Utils";
 
+const loader = new STLLoader();
 const pos_yAxis = new THREE.Vector3(0, 1, 0);
 
 const DefaultParameters = {
@@ -42,6 +44,7 @@ const DefaultParameters = {
   vertical_dist_plat_stand_anchor: 5, // vertical distance between the base and platform stand's anchor
 };
 
+
 class Mechanism extends THREE.Group {
   constructor(params) {
     super();
@@ -55,8 +58,8 @@ class Mechanism extends THREE.Group {
     this._servo_PitchRoll_right = new Servo(this._parameters.length_servo_horn_pitch_roll);
     this._servo_Yaw = new Servo(this._parameters.length_servo_horn_yaw);
     this._platformStand = new PlatformStand(
-      this._parameters.dist_plat_height, 
-      this._parameters.long_dist_plat_stand_anchor, 
+      this._parameters.dist_plat_height,
+      this._parameters.long_dist_plat_stand_anchor,
       this._parameters.lat_dist_plat_stand_anchor,
       this._parameters.vertical_dist_plat_stand_anchor,
     );
@@ -311,7 +314,7 @@ class Mechanism extends THREE.Group {
   getYawServoAngle() {
     const a1 = this._parameters.length_servo_horn_yaw;
     const a2 = this._parameters.length_connecting_rod_yaw;
-    
+
     // define the position of the target point for the ik solution
     const p2 = this._platformStand
       .getBallJoint()
@@ -337,7 +340,7 @@ class Mechanism extends THREE.Group {
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Right());
 
-      this._servo_Yaw
+    this._servo_Yaw
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getYawServoAngle());
   }
@@ -380,11 +383,11 @@ class Mechanism extends THREE.Group {
     const lookAtOrientation = new THREE.Euler()
       .setFromRotationMatrix(
         new THREE.Matrix4()
-              .lookAt( 
-                sourcePoint,        // eye 
-                targetWorldPosition,// center
-                pos_yAxis,          // up vector
-              )
+          .lookAt(
+            sourcePoint,        // eye 
+            targetWorldPosition,// center
+            pos_yAxis,          // up vector
+          )
       );
     this.setFinalOrientation(
       - lookAtOrientation.y, // yaw 
@@ -405,7 +408,7 @@ class Base extends THREE.Mesh {
   constructor() {
     super(
       new THREE.CylinderGeometry(25, 25, 1, 20, 32),
-      new THREE.MeshBasicMaterial({ color: 0x595959, opacity: 0.5, transparent: true })
+      new THREE.MeshBasicMaterial({ color: 0x595959, opacity: 0.25, transparent: true })
     );
   }
 }
@@ -489,11 +492,16 @@ class Servo extends THREE.Group {
     super();
 
     // create servo body mesh
-    let mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(10, 10, 4),
-      new THREE.MeshBasicMaterial({ color: 0x92c350, opacity: 0.5, transparent: true, })
-    );
-    this.add(mesh);
+    let _self = this;
+    loader.load(process.env.PUBLIC_URL + '/models/servo/MG955.stl', function (geometry) {
+      const material = new THREE.MeshBasicMaterial({ color: 0x404040, opacity: 0.5, transparent: true, });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(3.0, 0.0, 0);
+      mesh.rotation.set(Math.PI / 2, 0, 0);
+      let scaleFactor = 7.5;
+      mesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      _self.add(mesh);
+    });
 
     // create children
     this._horn = new ServoHorn(servoHornLength);
@@ -514,12 +522,21 @@ class ServoHorn extends THREE.Group {
     super();
 
     // create mesh
-    let geometry = new THREE.BoxGeometry(length, 1, 2);
-    geometry.translate(length / 2, 0, 0);
-    let material = new THREE.MeshBasicMaterial({ color: 0xff5733, opacity: 0.5, transparent: true, });
-    let mesh = new THREE.Mesh(geometry, material);
-
-    this.add(mesh);
+    let _self = this;
+    loader.load(process.env.PUBLIC_URL + '/models/horn/MG90s_arm.stl', function (geometry) {
+      const material = new THREE.MeshBasicMaterial({ color: 0xF5F5F5, opacity: 0.5, transparent: true, });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(0, 0, 0);
+      mesh.rotation.set(Math.PI, -Math.PI/2, 0);
+      let scaleFactor = 0.75;
+      mesh.scale.set(scaleFactor * length / 12.0, scaleFactor, scaleFactor * length / 12.0);
+      _self.add(mesh);
+    });
+    // let geometry = new THREE.BoxGeometry(length, 1, 2);
+    // geometry.translate(length / 2, 0, 0);
+    // let material = new THREE.MeshBasicMaterial({ color: 0xff5733, opacity: 0.5, transparent: true, });
+    // let mesh = new THREE.Mesh(geometry, material);
+    // this.add(mesh);
 
     // create children
     this._ball_joint = new BallJoint();
