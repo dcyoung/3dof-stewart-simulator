@@ -1,6 +1,8 @@
 import * as THREE from "three";
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { calcServoAngle, solveIk2JointPlanar } from "./InverseKinematics";
 import { sinBetween } from "./Utils";
+
 
 const pos_yAxis = new THREE.Vector3(0, 1, 0);
 
@@ -42,6 +44,7 @@ const DefaultParameters = {
   vertical_dist_plat_stand_anchor: 5, // vertical distance between the base and platform stand's anchor
 };
 
+
 class Mechanism extends THREE.Group {
   constructor(params) {
     super();
@@ -55,8 +58,8 @@ class Mechanism extends THREE.Group {
     this._servo_PitchRoll_right = new Servo(this._parameters.length_servo_horn_pitch_roll);
     this._servo_Yaw = new Servo(this._parameters.length_servo_horn_yaw);
     this._platformStand = new PlatformStand(
-      this._parameters.dist_plat_height, 
-      this._parameters.long_dist_plat_stand_anchor, 
+      this._parameters.dist_plat_height,
+      this._parameters.long_dist_plat_stand_anchor,
       this._parameters.lat_dist_plat_stand_anchor,
       this._parameters.vertical_dist_plat_stand_anchor,
     );
@@ -116,6 +119,18 @@ class Mechanism extends THREE.Group {
 
     //
     this._clock = new THREE.Clock();
+
+    let _this = this;
+
+    const loader = new STLLoader();
+    loader.load(process.env.PUBLIC_URL + '/models/Stanford_Bunny.stl', function (geometry) {
+      const material = new THREE.MeshPhongMaterial({ color: 0xff5533, specular: 0x111111, shininess: 200 });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(0, - 0.25, 0.6);
+      mesh.rotation.set(0, - Math.PI / 2, 0);
+      mesh.scale.set(0.5, 0.5, 0.5);
+      _this.add(mesh);
+    });
   }
 
   getPlatform() {
@@ -311,7 +326,7 @@ class Mechanism extends THREE.Group {
   getYawServoAngle() {
     const a1 = this._parameters.length_servo_horn_yaw;
     const a2 = this._parameters.length_connecting_rod_yaw;
-    
+
     // define the position of the target point for the ik solution
     const p2 = this._platformStand
       .getBallJoint()
@@ -337,7 +352,7 @@ class Mechanism extends THREE.Group {
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Right());
 
-      this._servo_Yaw
+    this._servo_Yaw
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getYawServoAngle());
   }
@@ -380,11 +395,11 @@ class Mechanism extends THREE.Group {
     const lookAtOrientation = new THREE.Euler()
       .setFromRotationMatrix(
         new THREE.Matrix4()
-              .lookAt( 
-                sourcePoint,        // eye 
-                targetWorldPosition,// center
-                pos_yAxis,          // up vector
-              )
+          .lookAt(
+            sourcePoint,        // eye 
+            targetWorldPosition,// center
+            pos_yAxis,          // up vector
+          )
       );
     this.setFinalOrientation(
       - lookAtOrientation.y, // yaw 

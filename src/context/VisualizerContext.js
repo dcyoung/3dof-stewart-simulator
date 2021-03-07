@@ -1,5 +1,6 @@
 import React from "react";
-import { Visualizer, DebugHUD, MechanismDebugHudComponent } from "../modules/Graphics";
+import { Visualizer } from "../modules/Graphics";
+import { DebugHUD, MechanismDebugHudComponent } from "../modules/Hud";
 
 const VisualizerStateContext = React.createContext();
 const VisualizerDispatchContext = React.createContext();
