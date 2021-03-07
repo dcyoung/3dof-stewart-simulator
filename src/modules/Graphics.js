@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { OrthographicTrackballControls } from "three/examples/jsm/controls/OrthographicTrackballControls.js";
+import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 import { getEnumDefault } from "./Utils";
 import { Mechanism } from "./Mechanism";
@@ -92,7 +92,7 @@ class CameraControlsManager {
         );
         this.controlsMap[theViewType].enableKeys = false;
       } else {
-        this.controlsMap[theViewType] = new OrthographicTrackballControls(
+        this.controlsMap[theViewType] = new TrackballControls(
           this.cameraManager.camera,
           this.renderer.domElement
         );
@@ -188,7 +188,7 @@ class CameraManager {
         break;
       case CameraViewEnum.ORTHO_FRONT:
         this.camera.position.set(0, 0, this.startingCamDistance);
-        this.camera.up = pos_yAxis; //set up vectors so that the pan function from the OrthographicTrackballControls will work properly
+        this.camera.up = pos_yAxis; //set up vectors so that the pan function from the TrackballControls will work properly
         break;
       case CameraViewEnum.ORTHO_BACK:
         this.camera.position.set(0, 0, -this.startingCamDistance);
