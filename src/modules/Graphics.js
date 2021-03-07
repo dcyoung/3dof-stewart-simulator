@@ -302,6 +302,7 @@ class MoveableTarget extends THREE.Mesh {
 
 class MechanismDebugHudComponent {
   constructor() {
+    this._isDisposed = false;
     this._mount = null;
     this._visualizer = null;
     this._mechanism = null;
@@ -324,7 +325,58 @@ class MechanismDebugHudComponent {
     // this._dispExtra = null;
   }
 
+  dispose() {
+    if (this._isDisposed){
+      return;
+    }
+
+    this._isDisposed = true;
+    
+    [
+      this._dispServoLeft,
+      this._dispServoHornLeft,
+      this._dispPlatformAnchorLeft,
+      this._dispConnectingRodLeft,
+      this._dispServoRight,
+      this._dispServoHornRight,
+      this._dispPlatformAnchorRight,
+      this._dispConnectingRodRight,
+      this._dispServoYaw,
+      this._dispServoHornYaw,
+      this._dispPlatformStandAnchorYaw,
+      this._dispConnectingRodYaw,
+      // this._dispExtra,
+    ].forEach(elem => {
+      this._mount.removeChild(elem);
+      elem.remove();
+    });
+    
+    this._dispServoLeft = null;
+    this._dispServoHornLeft = null;
+    this._dispPlatformAnchorLeft = null;
+    this._dispConnectingRodLeft = null;
+    
+    this._dispServoRight = null;
+    this._dispServoHornRight = null;
+    this._dispPlatformAnchorRight = null;
+    this._dispConnectingRodRight = null;
+    
+    this._dispServoYaw = null;
+    this._dispServoHornYaw = null;
+    this._dispPlatformStandAnchorYaw = null
+    this._dispConnectingRodYaw = null;
+
+
+    this._mount = null;
+    this._visualizer = null;
+    this._mechanism = null;
+  }
+  
   init(mount, visualizer) {
+    if (this._isDisposed) {
+      return;
+    }
+    
     this._mount = mount;
     this._visualizer = visualizer;
     this._mechanism = visualizer._mechanism;
@@ -367,6 +419,10 @@ class MechanismDebugHudComponent {
   }
 
   animate() {
+    if (this._isDisposed) {
+      return;
+    }
+
     ////////////////////////////////////////////////////////////////////
     // update the display text for left and right servo
     this.updateElement(
@@ -488,7 +544,7 @@ class DebugHUD {
   constructor() {
     this._mount = null;
     this._visualizer = null;
-    this._components = []
+    this._componentsByName = []
   }
 
   init(mount, visualizer) {
@@ -497,15 +553,27 @@ class DebugHUD {
     this.animate();
   }
 
-  addHUDComponent(component) {
+  hasComponent(name) {
+    return name in this._componentsByName;
+  }
+
+  addOrReplaceHUDComponentByName(name, component) {
+    this.removeHudComponentByName(name);
     component.init(this._mount, this._visualizer)
-    this._components.push(component);
+    this._componentsByName[name] = component;
+  }
+
+  removeHudComponentByName(name) {
+    if (this.hasComponent(name)){
+      this._componentsByName[name].dispose();
+      delete this._componentsByName[name];
+    }
   }
 
   animate() {
-    this._components.forEach(component => {
+    for (const [key, component ] of Object.entries(this._componentsByName)) {
       component.animate();
-    });
+    }
   }
 }
 
@@ -583,6 +651,10 @@ class Visualizer {
     this._animHooks = [];
 
     ////////////////////////////////////////////////////////////////////
+    this._mechanism = new Mechanism();
+    this._scene.add(this._mechanism);
+
+    ////////////////////////////////////////////////////////////////////
     this.animate();
   }
 
@@ -595,13 +667,6 @@ class Visualizer {
       return;
     }
     this._mechanism.setFinalOrientation(0, 0, 0);
-  }
-
-  addMechanism() {
-    if (this._mechanism === undefined || this._mechanism === null) {
-      this._mechanism = new Mechanism();
-      this._scene.add(this._mechanism);
-    }
   }
 
   addAnimHook(hook) {

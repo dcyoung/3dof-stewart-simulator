@@ -2,7 +2,10 @@
 
 An interactive graphical simulator for the inverse kinematics of a 3DOF stewart platform.
 
-![Simulator Viz](docs/images/simulator.jpg)
+![LookAt Motion](docs/images/motion.gif)
+
+Also includes HUD support for realtime debug info.
+![Simulator Viz](docs/images/debug_hud.jpg)
 
 ## Quickstart
 

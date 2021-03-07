@@ -28,10 +28,13 @@ function visualizerReducer(state, action) {
       state.visualizer.deactivateTargetMode();
       return state;
     }
-    case "add_mechanism": {
-      if (state.visualizer._mechanism === null) {
-        state.visualizer.addMechanism();
-        state.debugHUD.addHUDComponent(new MechanismDebugHudComponent());
+    case "toggle_debug_info": {
+      const componentName = "debug";
+      if (state.debugHUD.hasComponent(componentName)) {
+        state.debugHUD.removeHudComponentByName(componentName);
+      }
+      else {
+        state.debugHUD.addOrReplaceHUDComponentByName(componentName, new MechanismDebugHudComponent());
       }
       return state;
     }

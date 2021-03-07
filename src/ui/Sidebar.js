@@ -1,18 +1,14 @@
 import React from "react";
-import MechanicalSettings from "./MechanicalSettings";
-import MiscSettings from "./MiscSettings";
+import Settings from "./Settings";
 
 import { Tab, Tabs } from "react-bootstrap";
 
 function Sidebar() {
   return (
     <div>
-      <Tabs defaultActiveKey="mechanical" id="uncontrolled-tab-example">
-        <Tab eventKey="mechanical" title="Mechanical">
-        <MechanicalSettings/>
-        </Tab>
+      <Tabs defaultActiveKey="settings" id="uncontrolled-tab-example">
         <Tab eventKey="settings" title="Settings">
-          <MiscSettings/>
+          <Settings/>
         </Tab>
         <Tab eventKey="disabled_example" title="Disabled" disabled>
           Disabled example text...
