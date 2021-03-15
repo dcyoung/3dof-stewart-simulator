@@ -447,9 +447,6 @@ class Mechanism extends THREE.Group {
       Math.PI + lookAtOrientation.x, // pitch
       Math.PI + lookAtOrientation.z // roll
     );
-
-    // TODO: cleanup, as we can't use this now that yaw is achieved by rotating the platform stand  
-    // this._platform.lookAt(target);
   }
 
   animate() {
@@ -585,11 +582,6 @@ class ServoHorn extends THREE.Group {
       mesh.scale.set(scaleFactor * length / 12.0, scaleFactor, scaleFactor * length / 12.0);
       _self.add(mesh);
     });
-    // let geometry = new THREE.BoxGeometry(length, 1, 2);
-    // geometry.translate(length / 2, 0, 0);
-    // let material = new THREE.MeshBasicMaterial({ color: 0xff5733, opacity: 0.5, transparent: true, });
-    // let mesh = new THREE.Mesh(geometry, material);
-    // this.add(mesh);
 
     // create children
     this._ball_joint = new BallJoint();
@@ -604,17 +596,8 @@ class ServoHorn extends THREE.Group {
   }
 }
 
-// // BallJoint (Class): A StewartSimulator Mechanical Module class.
-// //  Represents a ball joint.
-// class BallJoint extends THREE.Mesh {
-//   constructor(color = 0xffc0cb) {
-//     super(
-//       new THREE.SphereGeometry(0.5, 32, 32),
-//       new THREE.MeshBasicMaterial({ color: color, opacity: 0.5, transparent: true })
-//     );
-//   }
-// }
-
+// BallJoint (Class): A StewartSimulator Mechanical Module class.
+//  Represents a ball joint.
 class BallJoint extends THREE.Group {
   constructor(color = 0x303030) {
     super();
