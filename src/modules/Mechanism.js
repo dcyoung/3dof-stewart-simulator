@@ -335,14 +335,40 @@ class Mechanism extends THREE.Group {
     this._servo_PitchRoll_left
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Left());
+    this._servo_PitchRoll_left
+      .getHorn()
+      .getBallJoint()
+      .lookAt(    
+        this._platform
+          .getBallJointLeft()
+          .getWorldPosition(new THREE.Vector3())
+      );
 
     this._servo_PitchRoll_right
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Right());
+    this._servo_PitchRoll_right
+      .getHorn()
+      .getBallJoint()
+      .lookAt(    
+        this._platform
+          .getBallJointRight()
+          .getWorldPosition(new THREE.Vector3())
+      );
 
     this._servo_Yaw
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getYawServoAngle());
+    
+    this._servo_Yaw
+      .getHorn()
+      .getBallJoint()
+      .lookAt(    
+        this._platformStand
+          .getBallJoint()
+          .getWorldPosition(new THREE.Vector3())
+      );
+    
   }
 
   simulateMotion() {
@@ -366,6 +392,15 @@ class Mechanism extends THREE.Group {
       pos_yAxis,
       yaw
     );
+    // Orient the platform stand ball joint
+    this._platformStand
+      .getBallJoint()
+      .lookAt(
+        this._servo_Yaw
+          .getHorn()
+          .getBallJoint()
+          .getWorldPosition(new THREE.Vector3())
+      );
 
     // PITCH + Roll (accomplished by rotating the platform)
     this._platform.setRotationFromEuler(
@@ -376,6 +411,24 @@ class Mechanism extends THREE.Group {
         "XYZ"
       )
     );
+
+    // Orient the platform ball joints
+    this._platform
+      .getBallJointLeft()
+      .lookAt(
+        this._servo_PitchRoll_left
+          .getHorn()
+          .getBallJoint()
+          .getWorldPosition(new THREE.Vector3())
+      );
+    this._platform
+      .getBallJointRight()
+      .lookAt(
+        this._servo_PitchRoll_right
+          .getHorn()
+          .getBallJoint()
+          .getWorldPosition(new THREE.Vector3())
+      );
   }
 
   trackTarget(targetWorldPosition) {
@@ -424,7 +477,7 @@ class PlatformStand extends THREE.Mesh {
     super(geometry, material);
 
     // create children
-    this._ballJoint = new BallJoint(0xff0000);
+    this._ballJoint = new BallJoint();
     this._ballJoint.position.set(
       lat_dist_ball_joint,
       vertical_dist_ball_joint,
@@ -457,7 +510,7 @@ class Platform extends THREE.Group {
     this.add(mesh);
 
     // create children
-    this._ballJoint_left = new BallJoint(0xff0000);
+    this._ballJoint_left = new BallJoint();
     this._ballJoint_left.position.set(
       dist_plat_ball_joint_lat,
       0,
@@ -465,7 +518,7 @@ class Platform extends THREE.Group {
     );
     this.add(this._ballJoint_left);
 
-    this._ballJoint_right = new BallJoint(0x0000ff);
+    this._ballJoint_right = new BallJoint();
     this._ballJoint_right.position.set(
       -dist_plat_ball_joint_lat,
       0,
@@ -551,14 +604,34 @@ class ServoHorn extends THREE.Group {
   }
 }
 
-// BallJoint (Class): A StewartSimulator Mechanical Module class.
-//  Represents a ball joint.
-class BallJoint extends THREE.Mesh {
-  constructor(color = 0xffc0cb) {
-    super(
-      new THREE.SphereGeometry(0.5, 32, 32),
-      new THREE.MeshBasicMaterial({ color: color, opacity: 0.5, transparent: true })
-    );
+// // BallJoint (Class): A StewartSimulator Mechanical Module class.
+// //  Represents a ball joint.
+// class BallJoint extends THREE.Mesh {
+//   constructor(color = 0xffc0cb) {
+//     super(
+//       new THREE.SphereGeometry(0.5, 32, 32),
+//       new THREE.MeshBasicMaterial({ color: color, opacity: 0.5, transparent: true })
+//     );
+//   }
+// }
+
+class BallJoint extends THREE.Group {
+  constructor(color = 0x303030) {
+    super();
+
+    // create mesh
+    let _self = this;
+    loader.load(process.env.PUBLIC_URL + '/models/ball-joint/m3_ball_joint.stl', function (geometry) {
+      const material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.5, transparent: true, });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(0, 0, 0);
+      mesh.rotation.set(-Math.PI/2, 0, 0);
+      let scaleFactor = 0.15;
+      mesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      _self.add(mesh);
+    });
+
+    this.add(new THREE.AxesHelper(5));
   }
 }
 
