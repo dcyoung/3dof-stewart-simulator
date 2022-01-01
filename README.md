@@ -2,6 +2,8 @@
 
 An interactive graphical simulator for the inverse kinematics of a 3DOF stewart platform.
 
+[DEMO](https://dcyoung.github.io/3dof-stewart-simulator/)
+
 ![LookAt Motion](docs/images/motion.gif)
 
 Also includes HUD support for realtime debug info.
