@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/static/css/main.d9342892.chunk.css",
-    "main.js": "/static/js/main.e6acf3c8.chunk.js",
-    "main.js.map": "/static/js/main.e6acf3c8.chunk.js.map",
-    "runtime~main.js": "/static/js/runtime~main.a8a9905a.js",
-    "runtime~main.js.map": "/static/js/runtime~main.a8a9905a.js.map",
-    "static/css/2.6cbc0fd3.chunk.css": "/static/css/2.6cbc0fd3.chunk.css",
-    "static/js/2.a001b243.chunk.js": "/static/js/2.a001b243.chunk.js",
-    "static/js/2.a001b243.chunk.js.map": "/static/js/2.a001b243.chunk.js.map",
-    "index.html": "/index.html",
-    "precache-manifest.a419dc4adc2be566d028fc8d830a4c82.js": "/precache-manifest.a419dc4adc2be566d028fc8d830a4c82.js",
-    "service-worker.js": "/service-worker.js",
-    "static/css/2.6cbc0fd3.chunk.css.map": "/static/css/2.6cbc0fd3.chunk.css.map",
-    "static/css/main.d9342892.chunk.css.map": "/static/css/main.d9342892.chunk.css.map"
+    "main.css": "/3dof-stewart-simulator/static/css/main.d9342892.chunk.css",
+    "main.js": "/3dof-stewart-simulator/static/js/main.aadac10c.chunk.js",
+    "main.js.map": "/3dof-stewart-simulator/static/js/main.aadac10c.chunk.js.map",
+    "runtime~main.js": "/3dof-stewart-simulator/static/js/runtime~main.cd19b37c.js",
+    "runtime~main.js.map": "/3dof-stewart-simulator/static/js/runtime~main.cd19b37c.js.map",
+    "static/css/2.6cbc0fd3.chunk.css": "/3dof-stewart-simulator/static/css/2.6cbc0fd3.chunk.css",
+    "static/js/2.a001b243.chunk.js": "/3dof-stewart-simulator/static/js/2.a001b243.chunk.js",
+    "static/js/2.a001b243.chunk.js.map": "/3dof-stewart-simulator/static/js/2.a001b243.chunk.js.map",
+    "index.html": "/3dof-stewart-simulator/index.html",
+    "precache-manifest.fc66656df9c48526d6eb55ec0b4c0ab4.js": "/3dof-stewart-simulator/precache-manifest.fc66656df9c48526d6eb55ec0b4c0ab4.js",
+    "service-worker.js": "/3dof-stewart-simulator/service-worker.js",
+    "static/css/2.6cbc0fd3.chunk.css.map": "/3dof-stewart-simulator/static/css/2.6cbc0fd3.chunk.css.map",
+    "static/css/main.d9342892.chunk.css.map": "/3dof-stewart-simulator/static/css/main.d9342892.chunk.css.map"
   }
 }
