@@ -1,12 +1,17 @@
-let getEnumDefault = theEnum => {
+let getEnumDefault = (theEnum) => {
+  let smallestValue = null;
   for (let key in theEnum) {
     //don't consider the properties key
     if (key === "properties") break;
-    if (theEnum.properties[theEnum[key]].bIsDefault) {
-      return theEnum[key];
+    // Look for indicator of default as an early exit
+    let v = theEnum[key];
+    if (theEnum.properties[v].bIsDefault) {
+      return v;
+    } else if (smallestValue == null || v < smallestValue) {
+      smallestValue = v;
     }
   }
-  return null;
+  return smallestValue;
 };
 
 //creates an array of length "len" and filled with the specified itm value
@@ -59,7 +64,7 @@ let createGUID = () => {
 };
 
 //converts a color encoded in javascript hex (ie: 0x000028) to css formatted hex string (ie: #000028)
-let parseCSSColor = color => {
+let parseCSSColor = (color) => {
   if (typeof color === "number") {
     //make sure our hexadecimal number is padded out
     color = "#" + ("00000" + (color | 0).toString(16)).substr(-6);
@@ -68,7 +73,7 @@ let parseCSSColor = color => {
 };
 
 //calculates the contrasting color for determining overlay or text colors given a background
-let getContrast50 = hexcolor => {
+let getContrast50 = (hexcolor) => {
   return parseInt(hexcolor, 16) > 0xffffff / 2 ? "black" : "white";
 };
 
@@ -85,5 +90,5 @@ export {
   createGUID,
   parseCSSColor,
   getContrast50,
-  sinBetween
+  sinBetween,
 };

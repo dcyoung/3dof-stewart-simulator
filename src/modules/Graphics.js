@@ -23,20 +23,50 @@ const CameraViewEnum = {
   ORTHO_RIGHT: 7,
 
   properties: {
-    1: { value: 1, name: "PERSPECTIVE", displayName: "Free Cam" },
-    2: { value: 2, name: "ORTHO_TOP", displayName: "Top View" },
-    3: { value: 3, name: "ORTHO_BOTTOM", displayName: "Bottom View" },
-    4: { value: 4, name: "ORTHO_FRONT", displayName: "Front View" },
-    5: { value: 5, name: "ORTHO_BACK", displayName: "Back View" },
-    6: { value: 6, name: "ORTHO_LEFT", displayName: "Left View" },
-    7: { value: 7, name: "ORTHO_RIGHT", displayName: "Right View" }
-  }
+    1: {
+      value: 1,
+      name: "PERSPECTIVE",
+      displayName: "Free Cam",
+      bIsDefault: true,
+    },
+    2: {
+      value: 2,
+      name: "ORTHO_TOP",
+      displayName: "Top View",
+    },
+    3: {
+      value: 3,
+      name: "ORTHO_BOTTOM",
+      displayName: "Bottom View",
+    },
+    4: {
+      value: 4,
+      name: "ORTHO_FRONT",
+      displayName: "Front View",
+    },
+    5: {
+      value: 5,
+      name: "ORTHO_BACK",
+      displayName: "Back View",
+    },
+    6: {
+      value: 6,
+      name: "ORTHO_LEFT",
+      displayName: "Left View",
+    },
+    7: {
+      value: 7,
+      name: "ORTHO_RIGHT",
+      displayName: "Right View",
+    },
+  },
 };
 
 const BackgroundColorEnum = {
   DARK_BLUE: 1,
   GREY: 2,
   WHITE: 3,
+  WARM: 4,
 
   properties: {
     1: {
@@ -44,8 +74,8 @@ const BackgroundColorEnum = {
       name: "DARK_BLUE",
       color: 0x151c25,
       displayName: "Dark Blue",
-      bIsDefault: true,
-      textOverlayColor: { r: 255, g: 255, b: 255, a: 1.0 }
+      bIsDefault: false,
+      textOverlayColor: { r: 255, g: 255, b: 255, a: 1.0 },
     },
     2: {
       value: 2,
@@ -53,7 +83,7 @@ const BackgroundColorEnum = {
       color: 0xb0b0b0,
       displayName: "Grey",
       bIsDefault: false,
-      textOverlayColor: { r: 0, g: 0, b: 0, a: 1.0 }
+      textOverlayColor: { r: 0, g: 0, b: 0, a: 1.0 },
     },
     3: {
       value: 3,
@@ -61,9 +91,17 @@ const BackgroundColorEnum = {
       color: 0xffffff,
       displayName: "White",
       bIsDefault: false,
-      textOverlayColor: { r: 0, g: 0, b: 0, a: 1.0 }
-    }
-  }
+      textOverlayColor: { r: 0, g: 0, b: 0, a: 1.0 },
+    },
+    4: {
+      value: 4,
+      name: "WARM",
+      color: 0x72645b,
+      displayName: "Warm",
+      bIsDefault: true,
+      textOverlayColor: { r: 0, g: 0, b: 0, a: 1.0 },
+    },
+  },
 };
 
 // CameraControlsManager (Class): A StewartSimulator Graphics module class.
@@ -93,8 +131,8 @@ class CameraControlsManager {
           this.renderer.domElement
         );
         this.controlsMap[theViewType].noRotate = true;
-        this.controlsMap[theViewType].zoomSpeed = 1.0;
-        this.controlsMap[theViewType].panSpeed = 0.8;
+        this.controlsMap[theViewType].zoomSpeed = 1.5;
+        this.controlsMap[theViewType].panSpeed = 10;
         this.controlsMap[theViewType].staticMoving = true;
         this.controlsMap[theViewType].dynamicDampingFactor = 0.3;
       }
@@ -151,11 +189,12 @@ class CameraManager {
     this.previousViewType = null;
     this.orthoCam = null;
     this.perspectiveCam = null;
-    this.startingCamDistance = 75;
+    this.startingOrthoCamDistance = 125;
+    this.startingPerspectiveCamPosition = new THREE.Vector3(125, 50, 70);
   }
   //initialize the camera to a perspective view
   initCamera() {
-    this.changeCamera(CameraViewEnum.PERSPECTIVE);
+    this.changeCamera(getEnumDefault(CameraViewEnum));
   }
 
   //Switches the camera type and camera pose to match the view type
@@ -180,30 +219,30 @@ class CameraManager {
     this.camera.rotation.set(0, 0, 0);
     switch (theViewType) {
       case CameraViewEnum.PERSPECTIVE:
-        this.camera.position.set(0, this.startingCamDistance, 0);
+        this.camera.position.copy(this.startingPerspectiveCamPosition);
         break;
       case CameraViewEnum.ORTHO_FRONT:
-        this.camera.position.set(0, 0, this.startingCamDistance);
+        this.camera.position.set(0, 0, this.startingOrthoCamDistance);
         this.camera.up = pos_yAxis; //set up vectors so that the pan function from the TrackballControls will work properly
         break;
       case CameraViewEnum.ORTHO_BACK:
-        this.camera.position.set(0, 0, -this.startingCamDistance);
+        this.camera.position.set(0, 0, -this.startingOrthoCamDistance);
         this.camera.up = pos_yAxis;
         break;
       case CameraViewEnum.ORTHO_LEFT:
-        this.camera.position.set(-this.startingCamDistance, 0, 0);
+        this.camera.position.set(-this.startingOrthoCamDistance, 0, 0);
         this.camera.up = pos_yAxis;
         break;
       case CameraViewEnum.ORTHO_RIGHT:
-        this.camera.position.set(this.startingCamDistance, 0, 0);
+        this.camera.position.set(this.startingOrthoCamDistance, 0, 0);
         this.camera.up = pos_yAxis;
         break;
       case CameraViewEnum.ORTHO_TOP:
-        this.camera.position.set(0, this.startingCamDistance, 0);
+        this.camera.position.set(0, this.startingOrthoCamDistance, 0);
         this.camera.up = pos_zAxis;
         break;
       case CameraViewEnum.ORTHO_BOTTOM:
-        this.camera.position.set(0, -this.startingCamDistance, 0);
+        this.camera.position.set(0, -this.startingOrthoCamDistance, 0);
         this.camera.up = pos_zAxis;
         break;
       default:
@@ -353,6 +392,21 @@ class Visualizer {
     let ambientLight = new THREE.AmbientLight(0xffffff);
     this._scene.add(ambientLight);
 
+    this._scene.fog = new THREE.Fog(0x72645b, 2, 1500);
+    this._scene.add(new THREE.HemisphereLight(0x443333, 0x111122));
+    // this.addShadowedLight( 100, 100, 0, 0xffffff, 1.35 );
+    this.addShadowedLight( 0.5, 1, - 1, 0xffaa00, 1 );
+
+    const plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(10000, 10000),
+      new THREE.MeshPhongMaterial({ color: 0x999999, specular: 0x101010 })
+    );
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.y = -200;
+    this._scene.add(plane);
+
+    plane.receiveShadow = true;
+
     ////////////////////////////////////////////////////////////////////
     //Setup the actual world geometry using the template meshes where appropriate
     //An axis object to visualize the the 3 axes in a simple way.
@@ -372,9 +426,29 @@ class Visualizer {
     ////////////////////////////////////////////////////////////////////
     this._mechanism = new Mechanism();
     this._scene.add(this._mechanism);
+    this._mechanism.setFinalOrientation(0, 0, 0);
 
     ////////////////////////////////////////////////////////////////////
     this.animate();
+  }
+
+  addShadowedLight(x, y, z, color, intensity) {
+    const directionalLight = new THREE.DirectionalLight(color, intensity);
+    directionalLight.position.set(x, y, z);
+    this._scene.add(directionalLight);
+
+    directionalLight.castShadow = true;
+
+    const d = 1;
+    directionalLight.shadow.camera.left = -d;
+    directionalLight.shadow.camera.right = d;
+    directionalLight.shadow.camera.top = d;
+    directionalLight.shadow.camera.bottom = -d;
+
+    directionalLight.shadow.camera.near = 1;
+    directionalLight.shadow.camera.far = 400;
+
+    directionalLight.shadow.bias = -0.002;
   }
 
   toggleMechanismSimulatedMotion() {
@@ -419,6 +493,10 @@ class Visualizer {
 
   //Change the camera to the specified view and udpate the controls
   changeView(theViewType) {
+    console.log(
+      this._cameraManager.camera.position,
+      this._cameraManager.camera.rotation
+    );
     //remove the camera from the scene, change it and then add it back
     this._scene.remove(this._cameraManager.camera);
     this._cameraManager.changeCamera(theViewType);
@@ -462,7 +540,7 @@ class Visualizer {
     }
 
     this.animateMechanism();
-    this._animHooks.forEach(hook => {
+    this._animHooks.forEach((hook) => {
       hook.animate();
     });
     this.render();
