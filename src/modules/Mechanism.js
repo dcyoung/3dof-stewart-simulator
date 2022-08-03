@@ -1,9 +1,7 @@
 import * as THREE from "three";
-import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { calcServoAngle, solveIk2JointPlanar } from "./InverseKinematics";
 import { sinBetween } from "./Utils";
 
-const loader = new STLLoader();
 const pos_yAxis = new THREE.Vector3(0, 1, 0);
 
 const DefaultParameters = {
@@ -55,15 +53,12 @@ class Mechanism extends THREE.Group {
     this._base = new Base();
     this._servo_PitchRoll_left = new Servo(
       this._parameters.length_servo_horn_pitch_roll,
-      "s3003.stl"
     );
     this._servo_PitchRoll_right = new Servo(
       this._parameters.length_servo_horn_pitch_roll,
-      "s3003.stl"
     );
     this._servo_Yaw = new Servo(
       this._parameters.length_servo_horn_yaw,
-      "s3003.stl"
     );
     this._platformStand = new PlatformStand(
       this._parameters.dist_plat_stand_anchor_long,
@@ -132,12 +127,28 @@ class Mechanism extends THREE.Group {
     return this._platform;
   }
 
+  getPlatformStand() {
+    return this._platformStand;
+  }
+
   getBase() {
     return this._base;
   }
 
+  getServoPitchRollLeft() {
+    return this._servo_PitchRoll_left;
+  }
+
+  getServoPitchRollRight() {
+    return this._servo_PitchRoll_right;
+  }
+
+  getServoYaw() {
+    return this._servo_Yaw;
+  }
+
   getYawConnectingRodLength() {
-    return this._servo_Yaw
+    return this.getServoYaw()
       .getHorn()
       .getBallJoint()
       .getWorldPosition(new THREE.Vector3())
@@ -148,7 +159,7 @@ class Mechanism extends THREE.Group {
 
   getYawConnectingRodMidPoint_WorldPosition() {
     return getPointInBetweenByPerc(
-      this._servo_Yaw
+      this.getServoYaw()
         .getHorn()
         .getBallJoint()
         .getWorldPosition(new THREE.Vector3()),
@@ -158,43 +169,43 @@ class Mechanism extends THREE.Group {
   }
 
   getConnectingRodLength_Left() {
-    return this._servo_PitchRoll_left
+    return this.getServoPitchRollLeft()
       .getHorn()
       .getBallJoint()
       .getWorldPosition(new THREE.Vector3())
       .distanceTo(
-        this._platform.getBallJointLeft().getWorldPosition(new THREE.Vector3())
+        this.getPlatform().getBallJointLeft().getWorldPosition(new THREE.Vector3())
       );
   }
 
   getConnectingRodLength_Right() {
-    return this._servo_PitchRoll_right
+    return this.getServoPitchRollRight()
       .getHorn()
       .getBallJoint()
       .getWorldPosition(new THREE.Vector3())
       .distanceTo(
-        this._platform.getBallJointRight().getWorldPosition(new THREE.Vector3())
+        this.getPlatform().getBallJointRight().getWorldPosition(new THREE.Vector3())
       );
   }
 
   getConnectingRodMidPoint_Left_WorldPosition() {
     return getPointInBetweenByPerc(
-      this._servo_PitchRoll_left
+      this.getServoPitchRollLeft()
         .getHorn()
         .getBallJoint()
         .getWorldPosition(new THREE.Vector3()),
-      this._platform.getBallJointLeft().getWorldPosition(new THREE.Vector3()),
+      this.getPlatform().getBallJointLeft().getWorldPosition(new THREE.Vector3()),
       0.5
     );
   }
 
   getConnectingRodMidPoint_Right_WorldPosition() {
     return getPointInBetweenByPerc(
-      this._servo_PitchRoll_right
+      this.getServoPitchRollRight()
         .getHorn()
         .getBallJoint()
         .getWorldPosition(new THREE.Vector3()),
-      this._platform.getBallJointRight().getWorldPosition(new THREE.Vector3()),
+      this.getPlatform().getBallJointRight().getWorldPosition(new THREE.Vector3()),
       0.5
     );
   }
@@ -203,8 +214,10 @@ class Mechanism extends THREE.Group {
   getQVec_Left() {
     // initialize with the world position of the platform anchor point
     // then convert the world position to local "base" space
-    return this._base.worldToLocal(
-      this._platform.getBallJointLeft().getWorldPosition(new THREE.Vector3())
+    return this.getBase().worldToLocal(
+      this.getPlatform()
+        .getBallJointLeft()
+        .getWorldPosition(new THREE.Vector3())
     );
   }
 
@@ -212,8 +225,10 @@ class Mechanism extends THREE.Group {
   getQVec_Right() {
     // initialize with the world position of the platform anchor point
     // then convert the world position to local "base" space
-    return this._base.worldToLocal(
-      this._platform.getBallJointRight().getWorldPosition(new THREE.Vector3())
+    return this.getBase().worldToLocal(
+      this.getPlatform()
+        .getBallJointRight()
+        .getWorldPosition(new THREE.Vector3())
     );
   }
 
@@ -221,8 +236,10 @@ class Mechanism extends THREE.Group {
   getBVec_Left() {
     // initialize with the world position of the center of servo arm rotation
     // then convert the world position to local "base" space
-    return this._base.worldToLocal(
-      this._servo_PitchRoll_left.getHorn().getWorldPosition(new THREE.Vector3())
+    return this.getBase().worldToLocal(
+      this.getServoPitchRollLeft()
+        .getHorn()
+        .getWorldPosition(new THREE.Vector3())
     );
   }
 
@@ -230,8 +247,8 @@ class Mechanism extends THREE.Group {
   getBVec_Right() {
     // initialize with the world position of the center of servo arm rotation
     // then convert the world position to local "base" space
-    return this._base.worldToLocal(
-      this._servo_PitchRoll_right
+    return this.getBase().worldToLocal(
+      this.getServoPitchRollRight()
         .getHorn()
         .getWorldPosition(new THREE.Vector3())
     );
@@ -291,10 +308,10 @@ class Mechanism extends THREE.Group {
     const a2 = this._parameters.length_connecting_rod_yaw;
 
     // define the position of the target point for the ik solution
-    const p_world_desiredEndEffector = this._platformStand
+    const p_world_desiredEndEffector = this.getPlatformStand()
       .getBallJoint()
       .getWorldPosition(new THREE.Vector3());
-    const p_world_linkageOrigin = this._servo_Yaw
+    const p_world_linkageOrigin = this.getServoYaw()
       .getHorn()
       .getWorldPosition(new THREE.Vector3());
     // calculate a vector pointing from servo horn pivot toward the yaw anchor
@@ -315,35 +332,39 @@ class Mechanism extends THREE.Group {
 
   updateServos() {
     // Animate servo horns
-    this._servo_PitchRoll_left
+    this.getServoPitchRollLeft()
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Left());
-    this._servo_PitchRoll_left
+    this.getServoPitchRollLeft()
       .getHorn()
       .getBallJoint()
       .lookAt(
-        this._platform.getBallJointLeft().getWorldPosition(new THREE.Vector3())
+        this.getPlatform().getBallJointLeft().getWorldPosition(new THREE.Vector3())
       );
 
-    this._servo_PitchRoll_right
+    this.getServoPitchRollRight()
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getServoAngle_Right());
-    this._servo_PitchRoll_right
+    this.getServoPitchRollRight()
       .getHorn()
       .getBallJoint()
       .lookAt(
-        this._platform.getBallJointRight().getWorldPosition(new THREE.Vector3())
+        this.getPlatform()
+          .getBallJointRight()
+          .getWorldPosition(new THREE.Vector3())
       );
 
-    this._servo_Yaw
+    this.getServoYaw()
       .getHorn()
       .setRotationFromAxisAngle(pos_yAxis, this.getYawServoAngle());
 
-    this._servo_Yaw
+    this.getServoYaw()
       .getHorn()
       .getBallJoint()
       .lookAt(
-        this._platformStand.getBallJoint().getWorldPosition(new THREE.Vector3())
+        this.getPlatformStand()
+          .getBallJoint()
+          .getWorldPosition(new THREE.Vector3())
       );
   }
 
@@ -364,33 +385,33 @@ class Mechanism extends THREE.Group {
 
   setFinalOrientation(yaw, pitch, roll) {
     // YAW (accomplished by rotating the platform stand)
-    this._platformStand.setRotationFromAxisAngle(pos_yAxis, yaw);
+    this.getPlatformStand().setRotationFromAxisAngle(pos_yAxis, yaw);
     // Orient the platform stand ball joint
-    this._platformStand
+    this.getPlatformStand()
       .getBallJoint()
       .lookAt(
-        this._servo_Yaw
+        this.getServoYaw()
           .getHorn()
           .getBallJoint()
           .getWorldPosition(new THREE.Vector3())
       );
 
     // PITCH + Roll (accomplished by rotating the platform)
-    this._platform.setRotationFromEuler(new THREE.Euler(pitch, 0, roll, "XYZ"));
+    this.getPlatform().setRotationFromEuler(new THREE.Euler(pitch, 0, roll, "XYZ"));
 
     // Orient the platform ball joints
-    this._platform
+    this.getPlatform()
       .getBallJointLeft()
       .lookAt(
-        this._servo_PitchRoll_left
+        this.getServoPitchRollLeft()
           .getHorn()
           .getBallJoint()
           .getWorldPosition(new THREE.Vector3())
       );
-    this._platform
+    this.getPlatform()
       .getBallJointRight()
       .lookAt(
-        this._servo_PitchRoll_right
+        this.getServoPitchRollRight()
           .getHorn()
           .getBallJoint()
           .getWorldPosition(new THREE.Vector3())
@@ -398,7 +419,7 @@ class Mechanism extends THREE.Group {
   }
 
   trackTarget(targetWorldPosition) {
-    const sourcePoint = this._platform.getWorldPosition(new THREE.Vector3());
+    const sourcePoint = this.getPlatform().getWorldPosition(new THREE.Vector3());
     const lookAtOrientation = new THREE.Euler().setFromRotationMatrix(
       new THREE.Matrix4().lookAt(
         sourcePoint, // eye
@@ -418,29 +439,7 @@ class Mechanism extends THREE.Group {
   }
 }
 
-class Base extends THREE.Group {
-  constructor() {
-    super();
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xaaaaaa,
-      specular: 0x111111,
-      shininess: 200,
-      opacity: 0.5,
-      transparent: true,
-    });
-    let _self = this;
-    loader.load(
-      process.env.PUBLIC_URL + "/models/wheatley/skeleton.stl",
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.set(-Math.PI / 2, 0, 0);
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        _self.add(mesh);
-      }
-    );
-  }
-}
+class Base extends THREE.Group { }
 
 // PlatformStand (Class): A StewartSimulator Mechanical Module class.
 //   Represents a platform stand.
@@ -448,44 +447,17 @@ class PlatformStand extends THREE.Group {
   constructor(
     long_dist_ball_joint,
     lat_dist_ball_joint,
-    vertical_dist_ball_joint
+    vertical_dist_ball_joint,
   ) {
     super();
-    let _self = this;
-    // Yaw rod mesh
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xaaaaaa,
-      specular: 0x111111,
-      shininess: 200,
-      opacity: 0.5,
-      transparent: true,
-    });
-    loader.load(
-      process.env.PUBLIC_URL + "/models/wheatley/yaw_rod.stl",
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.set(-Math.PI / 2, 0, 0);
-        _self.add(mesh);
-      }
-    );
-    // Linkage Mount
-    loader.load(
-      process.env.PUBLIC_URL + "/models/wheatley/yaw_rod_mount.stl",
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.set(-Math.PI / 2, 0, 0);
-        _self.add(mesh);
-      }
-    );
     // Ball Joint
     this._ballJoint = new BallJoint();
-    _self._ballJoint.position.set(
+    this._ballJoint.position.set(
       lat_dist_ball_joint,
       vertical_dist_ball_joint,
       long_dist_ball_joint
     );
     this.add(this._ballJoint);
-    this.add(new THREE.AxesHelper(15));
   }
 
   getBallJoint() {
@@ -499,26 +471,9 @@ class Platform extends THREE.Group {
   constructor(
     dist_plat_ball_joint_long,
     dist_plat_ball_joint_lat,
-    dist_plat_ball_joint_vert
+    dist_plat_ball_joint_vert,
   ) {
     super();
-    let _self = this;
-    // Mesh
-    const material = new THREE.MeshPhongMaterial({
-      color: 0xaaaaaa,
-      specular: 0x111111,
-      shininess: 200,
-      opacity: 0.5,
-      transparent: true,
-    });
-    loader.load(
-      process.env.PUBLIC_URL + "/models/wheatley/center_platform.stl",
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.set(-Math.PI / 2, 0, 0);
-        _self.add(mesh);
-      }
-    );
 
     // create children
     this._ballJoint_left = new BallJoint();
@@ -536,8 +491,6 @@ class Platform extends THREE.Group {
       dist_plat_ball_joint_long
     );
     this.add(this._ballJoint_right);
-
-    this.add(new THREE.AxesHelper(30));
   }
 
   getBallJointLeft() {
@@ -552,28 +505,14 @@ class Platform extends THREE.Group {
 // Servo (Class): A StewartSimulator Mechanical Module class.
 //   Represents a servo.
 class Servo extends THREE.Group {
-  constructor(servoHornLength, modelName = "s3003.stl") {
+  constructor(
+    servoHornLength,
+  ) {
     super();
-    // create servo body mesh
-    let _self = this;
-    const material = new THREE.MeshBasicMaterial({
-      color: 0x404040,
-      opacity: 0.5,
-      transparent: true,
-    });
-    loader.load(
-      process.env.PUBLIC_URL + "/models/servo/" + modelName,
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        _self.add(mesh);
-      }
-    );
-
     // create children
     this._horn = new ServoHorn(servoHornLength);
     // this._horn.position.set(0, 5, 0);
     this.add(this._horn);
-    this.add(new THREE.AxesHelper(8));
   }
 
   getHorn() {
@@ -584,30 +523,14 @@ class Servo extends THREE.Group {
 // ServoHorn (Class): A StewartSimulator Mechanical Module class.
 //   Represents a servo horn.
 class ServoHorn extends THREE.Group {
-  constructor(length) {
+  constructor(
+    length,
+  ) {
     super();
-
-    // create mesh
-    let _self = this;
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xf5f5f5,
-      opacity: 0.5,
-      transparent: true,
-    });
-    loader.load(
-      process.env.PUBLIC_URL + "/models/horn/MG90s_arm.stl",
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.rotation.set(Math.PI, 0, 0);
-        _self.add(mesh);
-      }
-    );
 
     this._ballJoint = new BallJoint();
     this._ballJoint.position.set(0, 0, length);
     this.add(this._ballJoint);
-
-    this.add(new THREE.AxesHelper(8));
   }
 
   getBallJoint() {
@@ -617,32 +540,7 @@ class ServoHorn extends THREE.Group {
 
 // BallJoint (Class): A StewartSimulator Mechanical Module class.
 //  Represents a ball joint.
-class BallJoint extends THREE.Group {
-  constructor(color = 0x303030) {
-    super();
-
-    // create mesh
-    let _self = this;
-    const material = new THREE.MeshBasicMaterial({
-      color: color,
-      opacity: 0.5,
-      transparent: true,
-    });
-    loader.load(
-      process.env.PUBLIC_URL + "/models/ball-joint/m3_ball_joint.stl",
-      function (geometry) {
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(0, 0, 0);
-        mesh.rotation.set(-Math.PI / 2, 0, 0);
-        let scaleFactor = 0.15;
-        mesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
-        _self.add(mesh);
-      }
-    );
-
-    this.add(new THREE.AxesHelper(5));
-  }
-}
+class BallJoint extends THREE.Group { }
 
 function getPointInBetweenByPerc(pointA, pointB, percentage) {
   var dir = pointB.clone().sub(pointA);
@@ -651,4 +549,37 @@ function getPointInBetweenByPerc(pointA, pointB, percentage) {
   return pointA.clone().add(dir);
 }
 
-export { Mechanism };
+class HeadlessSimulation {
+  constructor() {
+    this._simulateMotion = false;
+    this._lookAtWorldPosition = null;
+    this._scene = new THREE.Scene();
+    this._mechanism = new Mechanism();
+    this._scene.add(this._mechanism);
+    this._mechanism.setFinalOrientation(0, 0, 0);
+    this.animateMechanism();
+  }
+
+  toggleMechanismSimulatedMotion() {
+    this._simulateMotion = !this._simulateMotion;
+  }
+
+  animateMechanism() {
+    requestAnimationFrame(() => this.animateMechanism());
+    if (this._mechanism == null || this._mechanism === undefined) {
+      return;
+    }
+    if (this._simulateMotion) {
+      this._mechanism.simulateMotion();
+    }
+    else if (this._lookAtWorldPosition) {
+      this._mechanism.trackTarget(
+        this._lookAtWorldPosition
+      );
+    }
+
+    this._mechanism.animate();
+  }
+}
+
+export { Mechanism, HeadlessSimulation };

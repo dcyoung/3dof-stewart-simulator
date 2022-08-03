@@ -4,6 +4,7 @@ import { TrackballControls } from "three/examples/jsm/controls/TrackballControls
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 import { getEnumDefault } from "./Utils";
 import { Mechanism } from "./Mechanism";
+import { addVisualMeshesToMechanism } from "./MechanismGraphics";
 
 // const pos_xAxis = new THREE.Vector3(1, 0, 0);
 // const neg_xAxis = new THREE.Vector3(-1, 0, 0);
@@ -395,7 +396,7 @@ class Visualizer {
     this._scene.fog = new THREE.Fog(0x72645b, 2, 1500);
     this._scene.add(new THREE.HemisphereLight(0x443333, 0x111122));
     // this.addShadowedLight( 100, 100, 0, 0xffffff, 1.35 );
-    this.addShadowedLight( 0.5, 1, - 1, 0xffaa00, 1 );
+    this.addShadowedLight(0.5, 1, - 1, 0xffaa00, 1);
 
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(10000, 10000),
@@ -425,6 +426,8 @@ class Visualizer {
 
     ////////////////////////////////////////////////////////////////////
     this._mechanism = new Mechanism();
+    addVisualMeshesToMechanism(this._mechanism);
+
     this._scene.add(this._mechanism);
     this._mechanism.setFinalOrientation(0, 0, 0);
 
@@ -570,4 +573,5 @@ class Visualizer {
     this._renderer.render(this._scene, this._cameraManager.camera);
   }
 }
+
 export { Visualizer, BackgroundColorEnum, CameraViewEnum };
