@@ -21,7 +21,7 @@ function Settings() {
           }
         }
       >
-        Toggle Debug Info
+        Toggle Debug HUD
       </Button>
       <Button
         variant="primary"

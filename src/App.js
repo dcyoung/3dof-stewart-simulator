@@ -15,7 +15,7 @@ function App() {
         <Container fluid={true}>
           <Row>
             <Col>
-              <Sidebar/>
+              <Sidebar />
             </Col>
             <Col xs={9}>
               <Toolbar />
