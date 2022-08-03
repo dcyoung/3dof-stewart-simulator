@@ -556,8 +556,8 @@ class HeadlessSimulation {
     this._scene = new THREE.Scene();
     this._mechanism = new Mechanism();
     this._scene.add(this._mechanism);
-    this._mechanism.setFinalOrientation(0, 0, 0);
     this.animateMechanism();
+    this._mechanism.setFinalOrientation(0, 0, 0);
   }
 
   toggleMechanismSimulatedMotion() {

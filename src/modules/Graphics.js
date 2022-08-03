@@ -427,12 +427,12 @@ class Visualizer {
     ////////////////////////////////////////////////////////////////////
     this._mechanism = new Mechanism();
     addVisualMeshesToMechanism(this._mechanism);
-
+    
     this._scene.add(this._mechanism);
-    this._mechanism.setFinalOrientation(0, 0, 0);
-
+    
     ////////////////////////////////////////////////////////////////////
     this.animate();
+    this._mechanism.setFinalOrientation(0, 0, 0);
   }
 
   addShadowedLight(x, y, z, color, intensity) {
