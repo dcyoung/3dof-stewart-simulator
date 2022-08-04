@@ -46,7 +46,7 @@ function addVisualMeshesToMechanism(
             mesh.rotation.set(-Math.PI / 2, 0, 0);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
-            mechanism.getBase().add(mesh);
+            mechanism.base.add(mesh);
         }
     );
 
@@ -56,7 +56,7 @@ function addVisualMeshesToMechanism(
         function (geometry) {
             const mesh = new THREE.Mesh(geometry, materialBase);
             mesh.rotation.set(-Math.PI / 2, 0, 0);
-            mechanism.getPlatformStand().add(mesh);
+            mechanism.platformStand.add(mesh);
         }
     );
     // Platform stand - Linkage Mount
@@ -65,7 +65,7 @@ function addVisualMeshesToMechanism(
         function (geometry) {
             const mesh = new THREE.Mesh(geometry, materialBase);
             mesh.rotation.set(-Math.PI / 2, 0, 0);
-            mechanism.getPlatformStand().add(mesh);
+            mechanism.platformStand.add(mesh);
         }
     );
 
@@ -75,15 +75,15 @@ function addVisualMeshesToMechanism(
         function (geometry) {
             const mesh = new THREE.Mesh(geometry, materialBase);
             mesh.rotation.set(-Math.PI / 2, 0, 0);
-            mechanism.getPlatform().add(mesh);
+            mechanism.platform.add(mesh);
         }
     );
 
     // Servos
     for (const [servo, meshUrl] of [
-        [mechanism.getServoPitchRollLeft(), meshUrlServoPitchRollLeft],
-        [mechanism.getServoPitchRollRight(), meshUrlServoPitchRollRight],
-        [mechanism.getServoYaw(), meshUrlServoYaw]]
+        [mechanism.servo_PitchRoll_left, meshUrlServoPitchRollLeft],
+        [mechanism.servo_PitchRoll_right, meshUrlServoPitchRollRight],
+        [mechanism.servo_Yaw, meshUrlServoYaw]]
     ) {
         loader.load(
             meshUrl,
@@ -97,19 +97,19 @@ function addVisualMeshesToMechanism(
             function (geometry) {
                 const mesh = new THREE.Mesh(geometry, materialServoHorn);
                 mesh.rotation.set(Math.PI, 0, 0);
-                servo.getHorn().add(mesh);
+                servo.horn.add(mesh);
             }
         );
     }
 
     for (const bJoint of [
-        mechanism.getPlatformStand().getBallJoint(),
-        mechanism.getServoPitchRollLeft().getHorn().getBallJoint(),
-        mechanism.getServoPitchRollRight().getHorn().getBallJoint(),
-        mechanism.getServoYaw().getHorn().getBallJoint(),
-        mechanism.getPlatformStand().getBallJoint(),
-        mechanism.getPlatform().getBallJointLeft(),
-        mechanism.getPlatform().getBallJointRight(),
+        mechanism.platformStand.ballJoint,
+        mechanism.servo_PitchRoll_left.horn.ballJoint,
+        mechanism.servo_PitchRoll_right.horn.ballJoint,
+        mechanism.servo_Yaw.horn.ballJoint,
+        mechanism.platformStand.ballJoint,
+        mechanism.platform.ballJoint_left,
+        mechanism.platform.ballJoint_right,
     ]) {
         loader.load(
             meshUrlBallJoint,
@@ -125,17 +125,17 @@ function addVisualMeshesToMechanism(
     }
 
     // Axes Helpers
-    mechanism.getPlatform().add(new THREE.AxesHelper(30));
-    mechanism.getPlatformStand().add(new THREE.AxesHelper(15));
+    mechanism.platform.add(new THREE.AxesHelper(30));
+    mechanism.platformStand.add(new THREE.AxesHelper(15));
 
     for (const servo of [
-        mechanism.getServoPitchRollLeft(),
-        mechanism.getServoPitchRollRight(),
-        mechanism.getServoYaw()
+        mechanism.servo_PitchRoll_left,
+        mechanism.servo_PitchRoll_right,
+        mechanism.servo_Yaw
     ]) {
         servo.add(new THREE.AxesHelper(8));
-        servo.getHorn().add(new THREE.AxesHelper(8));
-        servo.getHorn().getBallJoint().add(new THREE.AxesHelper(5));
+        servo.horn.add(new THREE.AxesHelper(8));
+        servo.horn.ballJoint.add(new THREE.AxesHelper(5));
     }
 }
 

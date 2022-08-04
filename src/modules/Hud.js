@@ -131,12 +131,12 @@ class MechanismDebugHudComponent {
         // update the display text for left and right servo
         this.updateElement(
             this._dispServoLeft,
-            this._mechanism._servo_PitchRoll_left.getWorldPosition(new THREE.Vector3()),
+            this._mechanism.servo_PitchRoll_left.getWorldPosition(new THREE.Vector3()),
             `Rotation: ${this._mechanism.getServoAngle_Left().toFixed(2)}rad`
         )
         this.updateElement(
             this._dispServoRight,
-            this._mechanism._servo_PitchRoll_right.getWorldPosition(new THREE.Vector3()),
+            this._mechanism.servo_PitchRoll_right.getWorldPosition(new THREE.Vector3()),
             `Rotation: ${this._mechanism.getServoAngle_Right().toFixed(2)}rad`
         )
 
@@ -155,18 +155,18 @@ class MechanismDebugHudComponent {
 
         ////////////////////////////////////////////////////////////////////
         // update the display text for left and right servo horn anchors
-        const hornBjLeft = this._mechanism._servo_PitchRoll_left
-            .getHorn()
-            .getBallJoint()
+        const hornBjLeft = this._mechanism.servo_PitchRoll_left
+            .horn
+            .ballJoint
             .getWorldPosition(new THREE.Vector3());
         this.updateElement(
             this._dispServoHornLeft,
             hornBjLeft,
             vectorToFixedString(hornBjLeft)
         )
-        const hornBjRight = this._mechanism._servo_PitchRoll_right
-            .getHorn()
-            .getBallJoint()
+        const hornBjRight = this._mechanism.servo_PitchRoll_right
+            .horn
+            .ballJoint
             .getWorldPosition(new THREE.Vector3());
         this.updateElement(
             this._dispServoHornRight,
@@ -176,16 +176,16 @@ class MechanismDebugHudComponent {
 
         ////////////////////////////////////////////////////////////////////
         // update the display text for left and right platform anchors
-        const platformAnchorLeft = this._mechanism._platform
-            .getBallJointLeft()
+        const platformAnchorLeft = this._mechanism.platform
+            .ballJoint_left
             .getWorldPosition(new THREE.Vector3());
         this.updateElement(
             this._dispPlatformAnchorLeft,
             platformAnchorLeft,
             vectorToFixedString(platformAnchorLeft)
         )
-        const platformAnchorRight = this._mechanism._platform
-            .getBallJointRight()
+        const platformAnchorRight = this._mechanism.platform
+            .ballJoint_right
             .getWorldPosition(new THREE.Vector3());
         this.updateElement(
             this._dispPlatformAnchorRight,
@@ -197,7 +197,7 @@ class MechanismDebugHudComponent {
         // update the display text for yaw components
         this.updateElement(
             this._dispServoYaw,
-            this._mechanism._servo_Yaw.getWorldPosition(new THREE.Vector3()),
+            this._mechanism.servo_Yaw.getWorldPosition(new THREE.Vector3()),
             `Rotation: ${this._mechanism.getYawServoAngle().toFixed(2)}rad`
         )
         this.updateElement(
@@ -205,17 +205,17 @@ class MechanismDebugHudComponent {
             this._mechanism.getYawConnectingRodMidPoint_WorldPosition(),
             `Len: ${this._mechanism.getYawConnectingRodLength().toFixed(2)}`
         )
-        const hornBjYaw = this._mechanism._servo_Yaw
-            .getHorn()
-            .getBallJoint()
+        const hornBjYaw = this._mechanism.servo_Yaw
+            .horn
+            .ballJoint
             .getWorldPosition(new THREE.Vector3());
         this.updateElement(
             this._dispServoHornYaw,
             hornBjYaw,
             vectorToFixedString(hornBjYaw)
         )
-        const platformStandAnchor = this._mechanism._platformStand
-            .getBallJoint()
+        const platformStandAnchor = this._mechanism.platformStand
+            .ballJoint
             .getWorldPosition(new THREE.Vector3());
         this.updateElement(
             this._dispPlatformStandAnchorYaw,

@@ -77,11 +77,6 @@ let getContrast50 = (hexcolor) => {
   return parseInt(hexcolor, 16) > 0xffffff / 2 ? "black" : "white";
 };
 
-let sinBetween = (min, max, t, speed = 1.0) => {
-  let halfRange = (max - min) / 2;
-  return min + halfRange + Math.sin(speed * t) * halfRange;
-};
-
 export {
   // Public Methods
   getEnumDefault,
@@ -90,5 +85,4 @@ export {
   createGUID,
   parseCSSColor,
   getContrast50,
-  sinBetween,
 };

@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
 import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 import { getEnumDefault } from "./Utils";
-import { Mechanism } from "./Mechanism";
+import { Mechanism } from "stewart-platform-simulator";
 import { addVisualMeshesToMechanism } from "./MechanismGraphics";
 
 // const pos_xAxis = new THREE.Vector3(1, 0, 0);
@@ -425,14 +425,13 @@ class Visualizer {
     this._animHooks = [];
 
     ////////////////////////////////////////////////////////////////////
-    this._mechanism = new Mechanism();
+    this._mechanism = new Mechanism.Mechanism3Dof(new Mechanism.MechanismParameters3Dof());
     addVisualMeshesToMechanism(this._mechanism);
-    
+
     this._scene.add(this._mechanism);
-    
+
     ////////////////////////////////////////////////////////////////////
     this.animate();
-    this._mechanism.setFinalOrientation(0, 0, 0);
   }
 
   addShadowedLight(x, y, z, color, intensity) {

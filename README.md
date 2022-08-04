@@ -26,3 +26,7 @@ yarn start
 npm install
 npm start
 ```
+
+## npm package
+
+This repository hosts only the interactive GUI app. The underlying mechanism and simulation is provided in a standalone npm package: [stewart-platform-simulator](https://github.com/dcyoung/stewart-platform-simulator)
