@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/3dof-stewart-simulator/precache-manifest.367d0dc7841d405f7df669928e9d11d9.js"
+  "/3dof-stewart-simulator/precache-manifest.a2da02b15d78e34b9f3af5047cf7158e.js"
 );
 
 self.addEventListener('message', (event) => {
