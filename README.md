@@ -1,4 +1,4 @@
-# 3dof-stewart-simulator
+# 3dof-stewart-simulator![Release](https://github.com/dcyoung/3dof-stewart-simulator/actions/workflows/viz-app-publish.yml/badge.svg)
 
 An interactive graphical simulator for the inverse kinematics of a 3DOF stewart platform.
 

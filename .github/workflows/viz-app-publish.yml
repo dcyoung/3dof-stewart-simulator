@@ -22,4 +22,4 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: vizualizer/dist # The folder the action should deploy.
+          folder: visualizer/dist # The folder the action should deploy.
