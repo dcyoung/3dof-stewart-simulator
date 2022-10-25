@@ -16,10 +16,12 @@ import { generateUUID } from "three/src/math/MathUtils";
 
 export declare interface WheatleySkinProps {
     mech: Mechanism3Dof,
+    enableHud?: boolean
 }
 
 export const WheatleySkin = ({
     mech,
+    enableHud = false,
     ...props
 }: WheatleySkinProps): JSX.Element => {
     const materialBase = useMemo(() => new MeshPhongMaterial({
@@ -90,6 +92,7 @@ export const WheatleySkin = ({
 
 
     useFrame(() => {
+        // Update the skin based on the underlying skeleton (mech)
         for (const [ref, src] of srcAndRefPairs) {
             ref.current?.setRotationFromMatrix(src.matrix);
             ref.current?.position.copy(src.position);
