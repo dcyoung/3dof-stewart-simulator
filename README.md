@@ -17,14 +17,9 @@ Also includes HUD support for realtime debug info.
 ```bash
 git clone https://github.com/dcyoung/3dof-stewart-simulator.git
 
-cd 3dof-stewart-simulator
-
-yarn upgrade
-yarn start
-
-# or alternatively
+cd 3dof-stewart-simulator/visualizer
 npm install
-npm start
+npm run dev
 ```
 
 ## npm package
